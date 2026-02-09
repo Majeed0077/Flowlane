@@ -9,6 +9,8 @@ import { ActivityModel } from "@/lib/models/activity";
 import { UserModel } from "@/lib/models/user";
 import { SettingsModel } from "@/lib/models/settings";
 import { AuditModel } from "@/lib/models/audit";
+import { ChatMessageModel } from "@/lib/models/chatMessage";
+import { NotificationModel } from "@/lib/models/notification";
 
 export async function POST(req: Request) {
   let session;
@@ -43,6 +45,8 @@ export async function POST(req: Request) {
   await bulkUpsert(InvoiceModel, body.invoices ?? []);
   await bulkUpsert(MilestoneModel, body.milestones ?? []);
   await bulkUpsert(ActivityModel, body.activities ?? []);
+  await bulkUpsert(ChatMessageModel, body.chat ?? []);
+  await bulkUpsert(NotificationModel, body.notifications ?? []);
   await bulkUpsert(UserModel, body.users ?? []);
   await bulkUpsert(SettingsModel, body.settings ?? []);
 

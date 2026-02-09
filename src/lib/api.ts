@@ -1,5 +1,5 @@
 import { apiFetch } from "@/lib/apiClient";
-import type { Activity, Contact, Invoice, Project, Milestone, AdminSettings } from "@/types";
+import type { Activity, Contact, Invoice, Project, Milestone, AdminSettings, Notification } from "@/types";
 
 type ApiResponse<T> = {
   success: boolean;
@@ -97,4 +97,15 @@ export const api = {
       method: "PUT",
       body: JSON.stringify({ template }),
     }),
+  getNotifications: () => request<{ items: Notification[]; unread: number }>("/api/notifications"),
+  createNotification: (payload: {
+    title: string;
+    body: string;
+    type: string;
+    entityType?: string;
+    entityId?: string;
+  }) =>
+    request<Notification>("/api/notifications", { method: "POST", body: JSON.stringify(payload) }),
+  markNotificationsRead: () =>
+    request<{ ok: true }>("/api/notifications/mark-read", { method: "POST" }),
 };

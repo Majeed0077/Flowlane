@@ -69,7 +69,7 @@ export async function POST(req: Request) {
   const id = `p-${crypto.randomUUID().slice(0, 8)}`;
   const payload = parsed.data.contactId
     ? { ...parsed.data, clientName: undefined }
-    : parsed.data;
+    : { ...parsed.data, contactId: undefined };
   const created = await ProjectModel.create({ _id: id, ...payload });
   const serialized = serialize(created);
   return NextResponse.json({

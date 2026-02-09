@@ -6,6 +6,7 @@ import type { Milestone, MilestoneStatus, Project } from "@/types";
 import { formatMoney, formatDate } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -48,6 +49,12 @@ export function ProjectDetail({
     { id: string; title: string; amount: number; currency: string }[]
   >([]);
   const [archived, setArchived] = useState(project.archived);
+  const [showMilestoneForm, setShowMilestoneForm] = useState(false);
+  const [milestoneTitle, setMilestoneTitle] = useState("");
+  const [milestoneDue, setMilestoneDue] = useState("");
+  const [milestoneAmount, setMilestoneAmount] = useState("");
+  const [milestoneCurrency, setMilestoneCurrency] = useState("USD");
+  const [milestoneStatus, setMilestoneStatus] = useState<MilestoneStatus>("pending");
   const role = useRole();
   const { addActivity } = useActivity();
   const { setProjects, setMilestones, setInvoices } = useLocalData();
@@ -161,6 +168,43 @@ export function ProjectDetail({
       });
     } catch {
       toast.error("Unable to create invoice draft.");
+    }
+  }
+
+  async function handleCreateMilestone() {
+    if (!milestoneTitle.trim()) {
+      toast.error("Milestone title is required.");
+      return;
+    }
+    const nextOrder = items.length ? Math.max(...items.map((item) => item.order)) + 1 : 1;
+    const payload: Partial<Milestone> = {
+      projectId: project.id,
+      title: milestoneTitle.trim(),
+      status: milestoneStatus,
+      dueDate: milestoneDue ? new Date(milestoneDue).toISOString() : undefined,
+      amount: milestoneAmount ? Number(milestoneAmount) : 0,
+      currency: milestoneCurrency,
+      order: nextOrder,
+    };
+    try {
+      const created = await api.createMilestone(payload);
+      setItems((prev) => [...prev, created]);
+      setMilestones((prev) => [...prev, created]);
+      toast.success("Milestone added.");
+      addActivity({
+        entityType: "project",
+        entityId: project.id,
+        action: "Milestone created",
+        meta: created.title,
+      });
+      setShowMilestoneForm(false);
+      setMilestoneTitle("");
+      setMilestoneDue("");
+      setMilestoneAmount("");
+      setMilestoneCurrency("USD");
+      setMilestoneStatus("pending");
+    } catch {
+      toast.error("Unable to create milestone.");
     }
   }
 
@@ -288,7 +332,75 @@ export function ProjectDetail({
       <Card className="p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold">Milestones</h2>
+          <DisableIfNoPermission permission="milestones:update">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowMilestoneForm((prev) => !prev)}
+            >
+              {showMilestoneForm ? "Cancel" : "Add milestone"}
+            </Button>
+          </DisableIfNoPermission>
         </div>
+        {showMilestoneForm ? (
+          <div className="grid gap-3 rounded-lg border bg-background p-4 md:grid-cols-2">
+            <div className="md:col-span-2 space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">Milestone title</label>
+              <Input
+                placeholder="e.g. First draft delivery"
+                value={milestoneTitle}
+                onChange={(event) => setMilestoneTitle(event.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">Due date</label>
+              <Input
+                type="date"
+                value={milestoneDue}
+                onChange={(event) => setMilestoneDue(event.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">Status</label>
+              <Select
+                value={milestoneStatus}
+                onValueChange={(value) => setMilestoneStatus(value as MilestoneStatus)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {statusOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">Amount</label>
+              <Input
+                type="number"
+                min={0}
+                placeholder="0"
+                value={milestoneAmount}
+                onChange={(event) => setMilestoneAmount(event.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">Currency</label>
+              <Input
+                placeholder="USD"
+                value={milestoneCurrency}
+                onChange={(event) => setMilestoneCurrency(event.target.value.toUpperCase())}
+              />
+            </div>
+            <div className="md:col-span-2 flex justify-end">
+              <Button onClick={handleCreateMilestone}>Save milestone</Button>
+            </div>
+          </div>
+        ) : null}
         <div className="space-y-3">
           {sorted.length === 0 ? (
             <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
@@ -363,6 +475,7 @@ export function ProjectDetail({
         <h2 className="text-sm font-semibold">Activity</h2>
         <ActivityTimeline entityType="project" entityId={project.id} />
       </div>
+
     </div>
   );
 }

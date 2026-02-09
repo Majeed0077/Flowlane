@@ -399,6 +399,7 @@ export function ContactDetail({
             )}
           </div>
         </TabsContent>
+
       </Tabs>
     </div>
   );

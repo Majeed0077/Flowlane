@@ -126,6 +126,15 @@ export function ProjectCreatePanel({
     try {
       const created = await api.createProject(payload);
       setProjects((prev) => [created, ...prev]);
+      api
+        .createNotification({
+          title: "New project created",
+          body: created.title,
+          type: "project_created",
+          entityType: "project",
+          entityId: created.id,
+        })
+        .catch(() => undefined);
       toast.success("Project created.");
       onOpenChange(false);
       setTitle("");

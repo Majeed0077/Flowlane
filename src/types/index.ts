@@ -114,6 +114,7 @@ export type User = {
   passwordHash: string;
   role: "owner" | "editor";
   active: boolean;
+  avatarUrl?: string;
 };
 
 export type Activity = {
@@ -130,4 +131,28 @@ export type AdminSettings = {
   timezone: string;
   logoUrl?: string;
   updatedAt?: string;
+};
+
+export type ChatMessage = {
+  id: string;
+  entityType: "contact" | "project" | "global";
+  entityId: string;
+  body: string;
+  senderId: string;
+  senderName: string;
+  senderRole: "owner" | "editor";
+  createdAt: string;
+  pinnedAt?: string;
+  readBy?: string[];
+};
+
+export type Notification = {
+  id: string;
+  title: string;
+  body: string;
+  type: string;
+  entityType?: string;
+  entityId?: string;
+  createdAt: string;
+  readBy?: string[];
 };

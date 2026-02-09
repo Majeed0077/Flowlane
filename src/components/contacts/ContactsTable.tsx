@@ -84,6 +84,7 @@ export function ContactsTable({
     });
   }, [contacts, search, source, stage, initialFilter, today, visibility]);
 
+
   return (
     <div className="space-y-4">
       <div className="glass flex flex-wrap items-center gap-3 rounded-xl px-4 py-3">

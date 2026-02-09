@@ -138,6 +138,15 @@ export function QuickAddSheet({
     try {
       const created = await api.createContact(newContact);
       setContacts([created, ...contacts]);
+      api
+        .createNotification({
+          title: "New lead captured",
+          body: `${created.name} - ${created.source}`,
+          type: "lead_created",
+          entityType: "contact",
+          entityId: created.id,
+        })
+        .catch(() => undefined);
       toast.success("Lead captured.");
     } catch {
       toast.error("Unable to create lead.");

@@ -39,7 +39,7 @@ export const projectCreateSchema = z.object({
       z.object({
         id: z.string().optional(),
         name: z.string().min(1),
-        url: z.string().url(),
+        url: z.string().min(1),
         type: z.string().optional().default(""),
         size: z.number().nonnegative(),
       }),
@@ -55,7 +55,7 @@ export const projectCreateSchema = z.object({
 
 export const projectUpdateSchema = projectCreateSchema.partial();
 export const projectUpdateWithRemovalsSchema = projectUpdateSchema.extend({
-  removeAttachmentUrls: z.array(z.string().url()).optional(),
+  removeAttachmentUrls: z.array(z.string().min(1)).optional(),
 });
 
 export const invoiceCreateSchema = z.object({
@@ -139,4 +139,9 @@ export const adminSettingsSchema = z.object({
   orgName: z.string().min(1),
   timezone: z.string().min(1),
   logoUrl: z.string().optional(),
+});
+
+export const userProfileUpdateSchema = z.object({
+  name: z.string().min(1).optional(),
+  avatarUrl: z.string().min(1).optional().or(z.literal("")),
 });

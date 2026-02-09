@@ -9,6 +9,8 @@ import { ActivityModel } from "@/lib/models/activity";
 import { UserModel } from "@/lib/models/user";
 import { SettingsModel } from "@/lib/models/settings";
 import { AuditModel } from "@/lib/models/audit";
+import { ChatMessageModel } from "@/lib/models/chatMessage";
+import { NotificationModel } from "@/lib/models/notification";
 
 export async function GET(req: Request) {
   let session;
@@ -21,7 +23,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
   await dbConnect();
-  const [contacts, projects, invoices, milestones, activities, users, settings] =
+  const [contacts, projects, invoices, milestones, activities, users, settings, chat, notifications] =
     await Promise.all([
       ContactModel.find().lean(),
       ProjectModel.find().lean(),
@@ -30,6 +32,8 @@ export async function GET(req: Request) {
       ActivityModel.find().lean(),
       UserModel.find().lean(),
       SettingsModel.find().lean(),
+      ChatMessageModel.find().lean(),
+      NotificationModel.find().lean(),
     ]);
 
   await AuditModel.create({
@@ -52,6 +56,8 @@ export async function GET(req: Request) {
       invoices,
       milestones,
       activities,
+      chat,
+      notifications,
       users,
       settings,
     },

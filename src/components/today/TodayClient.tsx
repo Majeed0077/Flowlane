@@ -28,8 +28,13 @@ export function TodayClient() {
 
   const milestoneItems = milestones
     .filter((milestone) => {
+      if (!milestone.dueDate) return false;
       const due = parseISO(milestone.dueDate);
-      return isAfter(due, today) && isBefore(due, addDays(today, 7));
+      return (
+        isBefore(due, today) ||
+        isSameDay(due, today) ||
+        (isAfter(due, today) && isBefore(due, addDays(today, 7)))
+      );
     })
     .map((milestone) => {
       const project = projects.find((item) => item.id === milestone.projectId);

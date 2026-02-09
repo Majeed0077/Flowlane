@@ -1,16 +1,17 @@
 "use client";
 
-import { Bell, LogOut, Plus, Search } from "lucide-react";
+import { LogOut, Plus, Search } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { QuickAddSheet } from "@/components/layout/QuickAddSheet";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ProjectCreatePanel } from "@/components/projects/ProjectCreatePanel";
 import { useRouter } from "next/navigation";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 type SearchResult = {
   contacts: { id: string; name: string; company?: string }[];
@@ -18,8 +19,22 @@ type SearchResult = {
   invoices: { id: string; invoiceNo: string }[];
 };
 
-export function TopBar() {
-  const [role, setRole] = useState<"owner" | "editor">("editor");
+type HeaderUser = {
+  role: "owner" | "editor";
+  name?: string;
+  avatarUrl?: string;
+};
+
+export function TopBar({
+  initialRole,
+  initialUser,
+}: {
+  initialRole?: "owner" | "editor" | null;
+  initialUser?: HeaderUser | null;
+}) {
+  const [user, setUser] = useState<HeaderUser | null>(
+    initialUser ?? (initialRole ? { role: initialRole } : null),
+  );
   const [query, setQuery] = useState("");
   const router = useRouter();
   const [quickAddOpen, setQuickAddOpen] = useState(false);
@@ -65,11 +80,30 @@ export function TopBar() {
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (!mounted || !data?.success || !data?.data?.role) return;
-        setRole(data.data.role);
+        setUser({
+          role: data.data.role,
+          name: data.data.name,
+          avatarUrl: data.data.avatarUrl,
+        });
       })
       .catch(() => undefined);
+    function handleProfileUpdate() {
+      fetch("/api/auth/me")
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (!data?.success || !data?.data?.role) return;
+          setUser({
+            role: data.data.role,
+            name: data.data.name,
+            avatarUrl: data.data.avatarUrl,
+          });
+        })
+        .catch(() => undefined);
+    }
+    window.addEventListener("vaultflow-profile-updated", handleProfileUpdate);
     return () => {
       mounted = false;
+      window.removeEventListener("vaultflow-profile-updated", handleProfileUpdate);
     };
   }, []);
 
@@ -201,15 +235,41 @@ export function TopBar() {
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="secondary">
-            {role.charAt(0).toUpperCase() + role.slice(1)}
-          </Badge>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <Bell className="h-4 w-4" />
-                </Button>
+                <Link
+                  href="/profile"
+                  className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border bg-muted/60 text-xs font-semibold text-foreground"
+                >
+                  {user?.avatarUrl ? (
+                    <Image
+                      src={user.avatarUrl}
+                      alt={user.name ?? "Profile"}
+                      width={32}
+                      height={32}
+                      className="h-8 w-8 object-cover"
+                    />
+                  ) : (
+                    <span suppressHydrationWarning>
+                      {user?.name?.charAt(0)?.toUpperCase() ??
+                        user?.role?.charAt(0)?.toUpperCase() ??
+                        "U"}
+                    </span>
+                  )}
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>
+                {user?.name ?? "Profile"} - {user?.role ?? "User"}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <NotificationBell />
+                </div>
               </TooltipTrigger>
               <TooltipContent>Notifications</TooltipContent>
             </Tooltip>

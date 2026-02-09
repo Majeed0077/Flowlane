@@ -92,6 +92,7 @@ export async function getCurrentUser() {
       name: user.name,
       email: user.email,
       role: normalizeRole(user.role),
+      avatarUrl: user.avatarUrl ?? "",
     };
   } catch {
     return null;

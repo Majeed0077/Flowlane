@@ -131,6 +131,14 @@ export default function DashboardPage() {
     [milestones],
   );
 
+  const projectCounts = useMemo(() => {
+    const active = projects.filter((project) => project.status === "active").length;
+    const planning = projects.filter((project) => project.status === "planning").length;
+    const onHold = projects.filter((project) => project.status === "on_hold").length;
+    const completed = projects.filter((project) => project.status === "completed").length;
+    return { active, planning, onHold, completed };
+  }, [projects]);
+
   return (
     <div className="space-y-6">
       <div>
@@ -207,6 +215,30 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       ) : null}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Project Pulse</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-4">
+          <div>
+            <p className="text-xs text-muted-foreground">Planning</p>
+            <p className="text-lg font-semibold">{projectCounts.planning}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Active</p>
+            <p className="text-lg font-semibold">{projectCounts.active}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">On Hold</p>
+            <p className="text-lg font-semibold">{projectCounts.onHold}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Completed</p>
+            <p className="text-lg font-semibold">{projectCounts.completed}</p>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

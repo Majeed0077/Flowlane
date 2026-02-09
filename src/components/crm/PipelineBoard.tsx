@@ -99,6 +99,7 @@ export function PipelineBoard() {
     }
   }, [followUpContact]);
 
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -130,7 +131,12 @@ export function PipelineBoard() {
       <DndContext onDragEnd={handleDragEnd}>
         <div className="grid gap-4 xl:grid-cols-7">
           {stages.map((stage) => (
-            <PipelineColumn key={stage.id} stage={stage.id} label={stage.label}>
+            <PipelineColumn
+              key={stage.id}
+              stage={stage.id}
+              label={stage.label}
+              count={columns[stage.id]?.length ?? 0}
+            >
               {columns[stage.id]?.length ? (
                 columns[stage.id].map((contact) => (
                   <PipelineCard
@@ -216,10 +222,12 @@ export function PipelineBoard() {
 function PipelineColumn({
   stage,
   label,
+  count,
   children,
 }: {
   stage: ContactStage;
   label: string;
+  count: number;
   children: React.ReactNode;
 }) {
   const { setNodeRef, isOver } = useDroppable({
@@ -236,6 +244,7 @@ function PipelineColumn({
     >
       <div className="mb-3 flex items-center justify-between">
         <p className="text-sm font-semibold">{label}</p>
+        <span className="text-xs text-muted-foreground">{count}</span>
       </div>
       <div className="flex flex-col gap-3">{children}</div>
     </div>

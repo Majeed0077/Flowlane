@@ -8,6 +8,7 @@ const UserSchema = new Schema(
     passwordHash: { type: String, required: true },
     isActive: { type: Boolean, default: true },
     invoiceEmailTemplate: { type: String, default: "" },
+    avatarUrl: { type: String, default: "" },
   },
   { timestamps: true },
 );

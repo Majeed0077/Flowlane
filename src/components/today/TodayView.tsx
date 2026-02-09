@@ -32,9 +32,19 @@ type Filter = "all" | "overdue" | "today" | "week" | "priority";
 
 export function TodayView({ initialItems }: { initialItems: TodayItem[] }) {
   const [items, setItems] = useState(initialItems);
+  const [completed, setCompleted] = useState<TodayItem[]>([]);
   const [filter, setFilter] = useState<Filter>("all");
   const { addActivity } = useActivity();
-  const { contacts, setContacts, milestones, setMilestones, invoices, setInvoices } = useLocalData();
+  const {
+    contacts,
+    setContacts,
+    milestones,
+    setMilestones,
+    invoices,
+    setInvoices,
+    projects,
+    setProjects,
+  } = useLocalData();
   const role = useRole();
   const isOwner = role === "owner";
   const today = new Date();
@@ -92,6 +102,7 @@ export function TodayView({ initialItems }: { initialItems: TodayItem[] }) {
           ),
         );
         setItems((prev) => prev.filter((i) => i.id !== item.id));
+        setCompleted((prev) => [item, ...prev]);
         toast.success("Marked as done.");
         addActivity({
           entityType: item.entityType,
@@ -111,7 +122,35 @@ export function TodayView({ initialItems }: { initialItems: TodayItem[] }) {
             milestone.id === item.entityId ? { ...milestone, status: "done" } : milestone,
           ),
         );
+        const updatedMilestones = milestones.map((milestone) =>
+          milestone.id === item.entityId ? { ...milestone, status: "done" } : milestone,
+        );
+        const completedProjectIds = new Set(
+          updatedMilestones
+            .filter((milestone) => milestone.status === "done")
+            .map((milestone) => milestone.projectId),
+        );
+        const projectsToComplete = projects.filter((project) => {
+          const projectMilestones = updatedMilestones.filter(
+            (milestone) => milestone.projectId === project.id,
+          );
+          if (projectMilestones.length === 0) return false;
+          return projectMilestones.every((milestone) => milestone.status === "done");
+        });
+        if (projectsToComplete.length > 0) {
+          await Promise.all(
+            projectsToComplete.map((project) => api.updateProject(project.id, { status: "completed" })),
+          );
+          setProjects((prev) =>
+            prev.map((project) =>
+              projectsToComplete.find((item) => item.id === project.id)
+                ? { ...project, status: "completed" }
+                : project,
+            ),
+          );
+        }
         setItems((prev) => prev.filter((i) => i.id !== item.id));
+        setCompleted((prev) => [item, ...prev]);
         toast.success("Marked as done.");
         addActivity({
           entityType: item.entityType,
@@ -132,6 +171,7 @@ export function TodayView({ initialItems }: { initialItems: TodayItem[] }) {
           ),
         );
         setItems((prev) => prev.filter((i) => i.id !== item.id));
+        setCompleted((prev) => [item, ...prev]);
         toast.success("Marked as done.");
         addActivity({
           entityType: item.entityType,
@@ -344,6 +384,29 @@ export function TodayView({ initialItems }: { initialItems: TodayItem[] }) {
           )}
         </div>
       )}
+      {completed.length > 0 ? (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold">Completed ({completed.length})</h2>
+          <div className="space-y-3">
+            {completed.map((item) => (
+              <Card key={`done-${item.id}`} className="p-4 opacity-70">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold">{item.title}</p>
+                    <p className="text-xs text-muted-foreground">{item.meta}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Done {formatDateShort(new Date().toISOString())}
+                    </p>
+                  </div>
+                  <Button asChild size="sm" variant="ghost">
+                    <Link href={item.href}>Open</Link>
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -22,9 +22,9 @@ export async function LandingHeader() {
           />
         </div>
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-          <Link href="#home" className="hover:text-foreground">Home</Link>
-          <Link href="#services" className="hover:text-foreground">Services</Link>
-          <Link href="#about" className="hover:text-foreground">About</Link>
+          <Link href="/#home" className="hover:text-foreground">Home</Link>
+          <Link href="/#services" className="hover:text-foreground">Services</Link>
+          <Link href="/#about" className="hover:text-foreground">About</Link>
         </nav>
         <div className="flex items-center gap-2">
           {user ? (

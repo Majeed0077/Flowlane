@@ -1,9 +1,20 @@
 import mongoose, { Schema } from "mongoose";
 
+const AttachmentSchema = new Schema(
+  {
+    id: String,
+    name: String,
+    url: String,
+    type: String,
+    size: Number,
+  },
+  { _id: false },
+);
+
 const ProjectSchema = new Schema(
   {
     _id: { type: String, required: true },
-    contactId: { type: String },
+    contactId: { type: String, required: false, default: undefined },
     clientName: { type: String },
     title: { type: String, required: true },
     name: { type: String },
@@ -11,15 +22,7 @@ const ProjectSchema = new Schema(
     pipelineStage: { type: String },
     notes: { type: String },
     attachments: {
-      type: [
-        {
-          id: String,
-          name: String,
-          url: String,
-          type: String,
-          size: Number,
-        },
-      ],
+      type: [AttachmentSchema],
       default: [],
     },
     startDate: { type: String },
@@ -31,6 +34,10 @@ const ProjectSchema = new Schema(
   },
   { timestamps: true },
 );
+
+if (mongoose.models.Project) {
+  mongoose.deleteModel("Project");
+}
 
 export const ProjectModel =
   mongoose.models.Project || mongoose.model("Project", ProjectSchema);
