@@ -1,5 +1,5 @@
-function getBaseUrl() {
-  if (typeof window !== "undefined") return "";
+function getServerInfo() {
+  if (typeof window !== "undefined") return null;
   // Lazy import to keep this module safe for client usage.
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { headers, cookies } = require("next/headers");
@@ -11,7 +11,7 @@ function getBaseUrl() {
     baseUrl: host ? `${protocol}://${host}` : "http://localhost:3000",
     cookieHeader: cookieStore
       .getAll()
-      .map((cookie) => `${cookie.name}=${cookie.value}`)
+      .map((cookie: { name: string; value: string }) => `${cookie.name}=${cookie.value}`)
       .join("; "),
   };
 }
@@ -20,8 +20,8 @@ export async function apiFetch<T>(
   path: string,
   options?: RequestInit,
 ): Promise<T> {
-  const serverInfo = typeof window === "undefined" ? getBaseUrl() : null;
-  const baseUrl = typeof window === "undefined" ? serverInfo.baseUrl : "";
+  const serverInfo = getServerInfo();
+  const baseUrl = serverInfo?.baseUrl ?? "";
   const response = await fetch(`${baseUrl}${path}`, {
     ...options,
     headers: {

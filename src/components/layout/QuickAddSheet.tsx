@@ -7,10 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { hasPermission } from "@/lib/rbac";
 import { useRole } from "@/lib/useRole";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useActivity } from "@/lib/activityStore";
 import { useLocalData } from "@/lib/localDataStore";
 import { api } from "@/lib/api";
+import type { ContactSource } from "@/types";
 import {
   Select,
   SelectContent,
@@ -38,6 +44,7 @@ export function QuickAddSheet({
       setOpenState(next);
     }
   };
+
   const role = useRole();
   const canAdd = hasPermission(role, "contacts:create");
   const { addActivity } = useActivity();
@@ -63,7 +70,9 @@ export function QuickAddSheet({
     if (!open) return;
     function onMouseDown(event: MouseEvent) {
       const target = event.target as Node | null;
-      const selectOpen = target instanceof Element && target.closest("[data-vf-select-content]");
+      const selectOpen =
+        target instanceof Element &&
+        target.closest("[data-vf-select-content]");
       if (selectOpen) return;
       if (panelRef.current && target && !panelRef.current.contains(target)) {
         setOpen(false);
@@ -88,7 +97,7 @@ export function QuickAddSheet({
   }, [open]);
 
   const [leadName, setLeadName] = useState("");
-  const [leadSource, setLeadSource] = useState("referral");
+  const [leadSource, setLeadSource] = useState<ContactSource>("referral");
   const [otherSource, setOtherSource] = useState("");
   const [showOtherSource, setShowOtherSource] = useState(false);
   const otherSourceRef = React.useRef<HTMLInputElement | null>(null);
@@ -98,8 +107,11 @@ export function QuickAddSheet({
       otherSourceRef.current?.focus();
     }
   }, [showOtherSource]);
+
   const [followupDate, setFollowupDate] = useState(
-    new Date(Date.now() + 1000 * 60 * 60 * 24 * 2).toISOString().slice(0, 10),
+    new Date(Date.now() + 1000 * 60 * 60 * 24 * 2)
+      .toISOString()
+      .slice(0, 10),
   );
 
   const canSave = useMemo(() => {
@@ -115,7 +127,11 @@ export function QuickAddSheet({
       toast.error("Every lead must have a next follow-up.");
       return;
     }
-    const normalizedSource =
+
+    const normalizedSource: {
+      source: ContactSource;
+      sourceLabel?: string;
+    } =
       leadSource === "other"
         ? { source: "other", sourceLabel: otherSource.trim() }
         : { source: leadSource, sourceLabel: undefined };
@@ -127,7 +143,7 @@ export function QuickAddSheet({
       email: "",
       phone: "",
       whatsapp: "",
-      source: normalizedSource.source as typeof leadSource,
+      source: normalizedSource.source,
       sourceLabel: normalizedSource.sourceLabel,
       stage: "new" as const,
       nextFollowUpAt: new Date(followupDate).toISOString(),
@@ -135,6 +151,7 @@ export function QuickAddSheet({
       notes: [],
       archived: false,
     };
+
     try {
       const created = await api.createContact(newContact);
       setContacts([created, ...contacts]);
@@ -152,6 +169,7 @@ export function QuickAddSheet({
       toast.error("Unable to create lead.");
       return;
     }
+
     addActivity({
       entityType: "contact",
       entityId: newContact.id,
@@ -209,7 +227,9 @@ export function QuickAddSheet({
         <div className="flex items-start justify-between border-b border-border px-6 py-4">
           <div>
             <p className="text-sm font-semibold">Quick Add</p>
-            <p className="text-xs text-muted-foreground">Capture a lead in under 20 seconds.</p>
+            <p className="text-xs text-muted-foreground">
+              Capture a lead in under 20 seconds.
+            </p>
           </div>
           <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
             X
@@ -223,12 +243,15 @@ export function QuickAddSheet({
               value={leadName}
               onChange={(event) => setLeadName(event.target.value)}
             />
+
             <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground">Source</label>
+              <label className="text-xs font-medium text-muted-foreground">
+                Source
+              </label>
               <Select
                 value={leadSource}
                 onValueChange={(value) => {
-                  setLeadSource(value);
+                  setLeadSource(value as ContactSource);
                   if (value === "other") {
                     setShowOtherSource(false);
                     setTimeout(() => setShowOtherSource(true), 0);
@@ -252,9 +275,12 @@ export function QuickAddSheet({
                 </SelectContent>
               </Select>
             </div>
+
             {showOtherSource ? (
               <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">Specify source</label>
+                <label className="text-xs font-medium text-muted-foreground">
+                  Specify source
+                </label>
                 <Input
                   ref={otherSourceRef}
                   placeholder="e.g. Facebook group, Cold email"
@@ -263,6 +289,7 @@ export function QuickAddSheet({
                 />
               </div>
             ) : null}
+
             <Input
               type="date"
               value={followupDate}

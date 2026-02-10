@@ -16,7 +16,7 @@ import {
 import { useLocalData } from "@/lib/localDataStore";
 import { useRole } from "@/lib/useRole";
 import { api } from "@/lib/api";
-import type { ProjectStatus } from "@/types";
+import type { ProjectStatus, ContactSource } from "@/types";
 
 export function ProjectCreatePanel({
   open,
@@ -35,7 +35,8 @@ export function ProjectCreatePanel({
   const [contactId, setContactId] = React.useState("");
   const [showCreateContact, setShowCreateContact] = React.useState(false);
   const [newContactName, setNewContactName] = React.useState("");
-  const [newContactSource, setNewContactSource] = React.useState("referral");
+  const [newContactSource, setNewContactSource] =
+    React.useState<ContactSource>("referral");
   const [newContactFollowUp, setNewContactFollowUp] = React.useState(
     new Date(Date.now() + 1000 * 60 * 60 * 24 * 2).toISOString().slice(0, 10),
   );
@@ -70,7 +71,9 @@ export function ProjectCreatePanel({
     if (!open) return;
     function onMouseDown(event: MouseEvent) {
       const target = event.target as Node | null;
-      const selectOpen = target instanceof Element && target.closest("[data-vf-select-content]");
+      const selectOpen =
+        target instanceof Element &&
+        target.closest("[data-vf-select-content]");
       if (selectOpen) return;
       if (panelRef.current && target && !panelRef.current.contains(target)) {
         onOpenChange(false);
@@ -144,7 +147,9 @@ export function ProjectCreatePanel({
       setNewContactName("");
       setNewContactSource("referral");
       setNewContactFollowUp(
-        new Date(Date.now() + 1000 * 60 * 60 * 24 * 2).toISOString().slice(0, 10),
+        new Date(Date.now() + 1000 * 60 * 60 * 24 * 2)
+          .toISOString()
+          .slice(0, 10),
       );
       setStatus("planning");
       setDueDate("");
@@ -224,7 +229,9 @@ export function ProjectCreatePanel({
     setNewContactName("");
     setNewContactSource("referral");
     setNewContactFollowUp(
-      new Date(Date.now() + 1000 * 60 * 60 * 24 * 2).toISOString().slice(0, 10),
+      new Date(Date.now() + 1000 * 60 * 60 * 24 * 2)
+        .toISOString()
+        .slice(0, 10),
     );
   }
 
@@ -269,7 +276,9 @@ export function ProjectCreatePanel({
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm font-semibold">New Project</p>
-              <p className="text-xs text-muted-foreground">Create a project with client context.</p>
+              <p className="text-xs text-muted-foreground">
+                Create a project with client context.
+              </p>
             </div>
             <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}>
               X
@@ -340,7 +349,12 @@ export function ProjectCreatePanel({
                     </div>
                     <div className="space-y-2">
                       <Label>Source</Label>
-                      <Select value={newContactSource} onValueChange={setNewContactSource}>
+                      <Select
+                        value={newContactSource}
+                        onValueChange={(value) =>
+                          setNewContactSource(value as ContactSource)
+                        }
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Source" />
                         </SelectTrigger>
@@ -439,7 +453,9 @@ export function ProjectCreatePanel({
             </div>
 
             <details className="rounded-xl border bg-background p-4">
-              <summary className="cursor-pointer text-sm font-medium">Links & attachments</summary>
+              <summary className="cursor-pointer text-sm font-medium">
+                Links & attachments
+              </summary>
               <div className="mt-4 space-y-4">
                 <div className="space-y-2">
                   <Label>Links</Label>
@@ -458,9 +474,7 @@ export function ProjectCreatePanel({
                   </p>
                   <div
                     className="rounded-xl border border-dashed border-border bg-background px-4 py-6 text-sm text-muted-foreground"
-                    onDragOver={(event) => {
-                      event.preventDefault();
-                    }}
+                    onDragOver={(event) => event.preventDefault()}
                     onDrop={(event) => {
                       event.preventDefault();
                       void uploadFiles(Array.from(event.dataTransfer.files ?? []));
@@ -494,27 +508,27 @@ export function ProjectCreatePanel({
                     <p className="text-xs text-muted-foreground">No attachments yet.</p>
                   ) : (
                     <div className="space-y-2">
-                    {attachments.map((file, index) => (
-                      <div
-                        key={`${file.url}-${index}`}
-                        className="flex items-center justify-between rounded-lg border bg-background px-3 py-2 text-xs"
-                      >
-                        <div>
-                          <p className="font-medium text-foreground">{file.name}</p>
+                      {attachments.map((file, index) => (
+                        <div
+                          key={`${file.url}-${index}`}
+                          className="flex items-center justify-between rounded-lg border bg-background px-3 py-2 text-xs"
+                        >
+                          <div>
+                            <p className="font-medium text-foreground">{file.name}</p>
                             <p className="text-muted-foreground">
                               {(file.size / 1024).toFixed(1)} KB
                             </p>
                           </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveAttachment(file, index)}
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    ))}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveAttachment(file, index)}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>

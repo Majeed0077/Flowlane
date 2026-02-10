@@ -19,9 +19,10 @@ declare global {
 const cached = global.mongoose ?? { conn: null, promise: null };
 
 export async function dbConnect() {
+  const uri = MONGODB_URI!;
   if (cached.conn) return cached.conn;
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI).then((mongooseInstance) => mongooseInstance);
+    cached.promise = mongoose.connect(uri).then((m) => m);
   }
   cached.conn = await cached.promise;
   global.mongoose = cached;
