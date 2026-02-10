@@ -165,13 +165,13 @@ export function InvoiceDetail({
           <tr>
             <td>${item.title}</td>
             <td style="text-align:right;">${item.qty} x ${formatMoney(
-              item.rate,
-              invoice.currency,
-            )}</td>
+          item.rate,
+          invoice.currency,
+        )}</td>
             <td style="text-align:right;">${formatMoney(
-              item.qty * item.rate,
-              invoice.currency,
-            )}</td>
+          item.qty * item.rate,
+          invoice.currency,
+        )}</td>
           </tr>
         `,
       )
@@ -184,9 +184,9 @@ export function InvoiceDetail({
             <td>${formatDate(payment.paidAt)}</td>
             <td>${payment.method}</td>
             <td style="text-align:right;">${formatMoney(
-              payment.amount,
-              invoice.currency,
-            )}</td>
+          payment.amount,
+          invoice.currency,
+        )}</td>
             <td>${payment.note || "-"}</td>
           </tr>
         `,
@@ -211,9 +211,8 @@ export function InvoiceDetail({
             <div style="font-size:12px; color:#666;">Due ${formatDate(invoice.dueDate)}</div>
           </div>
         </div>
-        <div style="margin-top:12px; font-size:12px; color:#444;">${contactName} - ${
-          project?.title || "Project"
-        }</div>
+        <div style="margin-top:12px; font-size:12px; color:#444;">${contactName} - ${project?.title || "Project"
+      }</div>
         <div style="margin-top:16px;">
           <div style="font-size:13px; font-weight:600; margin-bottom:8px;">Line items</div>
           <table style="width:100%; border-collapse:collapse; font-size:12px;">
@@ -229,9 +228,9 @@ export function InvoiceDetail({
               <tr>
                 <td colspan="2" style="text-align:right; font-weight:700; padding:8px 4px;">Total</td>
                 <td style="text-align:right; font-weight:700; padding:8px 4px;">${formatMoney(
-                  total,
-                  invoice.currency,
-                )}</td>
+        total,
+        invoice.currency,
+      )}</td>
               </tr>
             </tbody>
           </table>
@@ -576,7 +575,6 @@ export function InvoiceDetail({
               <span className="text-foreground">{formatDate(invoice.dueDate)}</span>
             </div>
           </div>
-          <MaskIfNoPermission permission="invoices:view_amounts" />
         </Card>
       )}
     </div>
