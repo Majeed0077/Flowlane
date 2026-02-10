@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db";
 import { InvoiceModel } from "@/lib/models/invoice";
 import { invoiceUpdateSchema } from "@/lib/validation";
-import { assertCanWriteInvoiceFields, sanitizeInvoiceForRole } from "@/lib/rbac";
+import { assertCanWriteInvoiceFields, sanitizeInvoiceForRole, type Role } from "@/lib/rbac";
 import { requireRole, requireSession } from "@/lib/auth";
 
 function serialize(doc: any) {
@@ -29,7 +29,7 @@ export async function GET(
   const serialized = serialize(invoice);
   return NextResponse.json({
     success: true,
-    data: sanitizeInvoiceForRole(serialized, session.role),
+    data: sanitizeInvoiceForRole(serialized, session.role as Role),
   });
 }
 
@@ -53,7 +53,10 @@ export async function PATCH(
     );
   }
   try {
-    assertCanWriteInvoiceFields(parsed.data as Record<string, unknown>, session.role);
+    assertCanWriteInvoiceFields(
+      parsed.data as Record<string, unknown>,
+      session.role as Role,
+    );
   } catch (error) {
     return NextResponse.json({ success: false, error: String(error) }, { status: 400 });
   }
@@ -64,7 +67,7 @@ export async function PATCH(
   const serialized = serialize(updated);
   return NextResponse.json({
     success: true,
-    data: sanitizeInvoiceForRole(serialized, session.role),
+    data: sanitizeInvoiceForRole(serialized, session.role as Role),
   });
 }
 

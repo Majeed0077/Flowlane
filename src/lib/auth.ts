@@ -1,13 +1,21 @@
 import { cookies } from "next/headers";
 import { jwtVerify, SignJWT } from "jose";
 import { UserModel } from "@/lib/models/user";
+import type { Role } from "@/lib/rbac";
 import { dbConnect } from "@/lib/db";
 
 const COOKIE_NAME = "vaultflow_session";
 
 type SessionPayload = {
   userId: string;
-  role: "owner" | "editor";
+  role: Role;
+  email: string;
+  name: string;
+};
+
+export type Session = {
+  userId: string;
+  role: Role;
   email: string;
   name: string;
 };
@@ -43,7 +51,7 @@ export async function createSessionToken(payload: SessionPayload) {
     .sign(getJwtSecret());
 }
 
-export async function getSessionFromRequest(req: Request) {
+export async function getSessionFromRequest(req: Request): Promise<Session | null> {
   try {
     const token = parseCookieHeader(req.headers.get("cookie"));
     if (!token) return null;
@@ -59,7 +67,7 @@ export async function getSessionFromRequest(req: Request) {
   }
 }
 
-export async function requireSession(req: Request) {
+export async function requireSession(req: Request): Promise<Session> {
   const session = await getSessionFromRequest(req);
   if (!session) {
     throw new Error("Unauthorized");
