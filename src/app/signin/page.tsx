@@ -91,7 +91,7 @@ export default function SignInPage() {
                 </p>
                 <h2 className="text-2xl font-semibold">Welcome back</h2>
                 <p className="text-sm text-muted-foreground">
-                  Use your VaultFlow account to continue.
+                  Use your Flowlane account to continue.
                 </p>
               </div>
             </div>

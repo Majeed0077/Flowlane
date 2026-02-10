@@ -35,7 +35,7 @@ export function LandingSections() {
       <section id="home" className="mx-auto w-full max-w-6xl px-6 py-16">
         <div className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-center">
           <div className="space-y-6">
-            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">VaultFlow CRM</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Flowlane CRM</p>
             <h1 className="text-4xl font-semibold leading-tight md:text-5xl">
               The internal agency CRM that replaces Notion + Trello.
             </h1>
@@ -73,7 +73,7 @@ export function LandingSections() {
         <div className="flex items-center justify-between gap-6">
           <h2 className="text-2xl font-semibold">Services & features</h2>
           <Link href="/signup" className="text-sm text-muted-foreground hover:text-foreground">
-            Start with VaultFlow →
+            Start with Flowlane →
           </Link>
         </div>
         <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -92,9 +92,9 @@ export function LandingSections() {
 
       <section id="about" className="mx-auto w-full max-w-6xl px-6 py-12">
         <div className="rounded-2xl border bg-card p-8">
-          <h2 className="text-2xl font-semibold">About VaultFlow</h2>
+          <h2 className="text-2xl font-semibold">About Flowlane</h2>
           <p className="mt-4 text-sm text-muted-foreground">
-            VaultFlow is designed for boutique agencies that need a calm, repeatable daily
+            Flowlane is designed for boutique agencies that need a calm, repeatable daily
             workflow. No heavy analytics. No noisy dashboards. Just a clear path from capture to
             follow-up to close.
           </p>
@@ -106,7 +106,7 @@ export function LandingSections() {
 
       <footer className="mx-auto w-full max-w-6xl px-6 py-10 text-xs text-muted-foreground">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <span>© 2026 VaultFlow. All rights reserved.</span>
+          <span>© 2026 Flowlane. All rights reserved.</span>
           <div className="flex items-center gap-4">
             <Link href="#home">Home</Link>
             <Link href="#services">Services</Link>

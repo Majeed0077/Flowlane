@@ -18,7 +18,7 @@ export async function GET(req: Request) {
   if (!existing) {
     const created = await SettingsModel.create({
       _id: SETTINGS_ID,
-      orgName: "VaultFlow",
+      orgName: "Flowlane",
       timezone: "UTC",
       logoUrl: "",
       updatedAt: new Date().toISOString(),

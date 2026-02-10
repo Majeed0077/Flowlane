@@ -3,7 +3,7 @@ import mongoose, { Schema } from "mongoose";
 const SettingsSchema = new Schema(
   {
     _id: { type: String, required: true },
-    orgName: { type: String, default: "VaultFlow" },
+    orgName: { type: String, default: "Flowlane" },
     timezone: { type: String, default: "UTC" },
     logoUrl: { type: String, default: "" },
     updatedAt: { type: String, required: true },

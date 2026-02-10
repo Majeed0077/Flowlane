@@ -103,7 +103,7 @@ export function Sidebar({ initialRole }: { initialRole?: "owner" | "editor" | nu
           >
             <Image
               src={collapsed ? "/icon a.png" : "/Logo.png"}
-              alt="VaultFlow"
+              alt="Flowlane"
               width={collapsed ? 32 : 200}
               height={collapsed ? 32 : 48}
               className={cn("object-contain", collapsed ? "h-8 w-8" : "h-10 w-auto")}
@@ -179,7 +179,7 @@ export function Sidebar({ initialRole }: { initialRole?: "owner" | "editor" | nu
               const url = URL.createObjectURL(blob);
               const link = document.createElement("a");
               link.href = url;
-              link.download = "vaultflow-data.json";
+              link.download = "flowlane-data.json";
               link.click();
               URL.revokeObjectURL(url);
             }}

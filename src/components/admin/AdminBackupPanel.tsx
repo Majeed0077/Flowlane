@@ -17,7 +17,7 @@ export function AdminBackupPanel() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `vaultflow-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      link.download = `flowlane-backup-${new Date().toISOString().slice(0, 10)}.json`;
       link.click();
       URL.revokeObjectURL(url);
       toast.success("Backup exported.");

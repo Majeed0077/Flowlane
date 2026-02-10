@@ -15,7 +15,7 @@ export default async function OwnerPage() {
         <div>
           <h1 className="text-2xl font-semibold">Owner Dashboard</h1>
           <p className="text-sm text-muted-foreground">
-            Manage everything across VaultFlow.
+            Manage everything across Flowlane.
           </p>
         </div>
         <div className="flex items-center gap-3">

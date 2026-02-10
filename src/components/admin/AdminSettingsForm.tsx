@@ -51,7 +51,7 @@ export function AdminSettingsForm({ initial }: { initial: AdminSettings }) {
           <Input
             value={settings.orgName ?? ""}
             onChange={(event) => setSettings((prev) => ({ ...prev, orgName: event.target.value }))}
-            placeholder="VaultFlow"
+            placeholder="Flowlane"
           />
         </div>
         <div className="space-y-2">

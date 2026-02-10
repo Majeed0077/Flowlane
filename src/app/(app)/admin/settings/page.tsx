@@ -5,9 +5,9 @@ import type { AdminSettings } from "@/types";
 async function getSettings() {
   try {
     const data = await apiFetch<{ success: boolean; data: AdminSettings }>(`/api/admin/settings`);
-    return data.data ?? { orgName: "VaultFlow", timezone: "UTC", logoUrl: "" };
+    return data.data ?? { orgName: "Flowlane", timezone: "UTC", logoUrl: "" };
   } catch {
-    return { orgName: "VaultFlow", timezone: "UTC", logoUrl: "" };
+    return { orgName: "Flowlane", timezone: "UTC", logoUrl: "" };
   }
 }
 

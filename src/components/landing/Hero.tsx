@@ -8,7 +8,7 @@ export function Hero() {
       <div className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-center">
         <div className="space-y-6">
           <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-            VaultFlow CRM
+            Flowlane CRM
           </p>
           <h1 className="text-4xl font-semibold leading-tight md:text-5xl">
             The internal agency CRM that replaces Notion + Trello.
@@ -44,7 +44,7 @@ export function Hero() {
             <div className="relative h-40 overflow-hidden rounded-xl border bg-background/60">
               <Image
                 src="/landing/hero-ui.svg"
-                alt="VaultFlow hero preview"
+                alt="Flowlane hero preview"
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 40vw"

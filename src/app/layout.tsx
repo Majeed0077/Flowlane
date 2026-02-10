@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "VaultFlow",
+  title: "Flowlane",
   description: "Internal agency CRM dashboard",
 };
 
