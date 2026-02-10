@@ -5,7 +5,7 @@ import { formatMoney, formatDateShort, isDueToday, isOverdue } from "@/lib/forma
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { parseISO, isAfter, addDays, isSameMonth } from "date-fns";
 import { StatCard } from "@/components/dashboard/StatCard";
-import { FocusList } from "@/components/dashboard/FocusList";
+import { FocusList, type FocusItem } from "@/components/dashboard/FocusList";
 import { useLocalData } from "@/lib/localDataStore";
 import { useRole } from "@/lib/useRole";
 
@@ -63,7 +63,7 @@ export default function DashboardPage() {
       );
   }, [invoices, isOwner]);
 
-  const focusItems = useMemo(() => {
+  const focusItems = useMemo<FocusItem[]>(() => {
     return [
       ...contacts
         .filter((contact) => isOverdue(contact.nextFollowUpAt, today))
@@ -71,7 +71,7 @@ export default function DashboardPage() {
           id: `followup-${contact.id}`,
           title: `Overdue follow-up: ${contact.name}`,
           meta: `${contact.company} - Due ${formatDateShort(contact.nextFollowUpAt)}`,
-          type: "Follow-up",
+          type: "Follow-up" as const,
           dueAt: contact.nextFollowUpAt,
           href: `/contacts/${contact.id}`,
           entityType: "contact" as const,
@@ -90,7 +90,7 @@ export default function DashboardPage() {
             meta: `${project?.title ?? "Project"} - Due ${formatDateShort(
               milestone.dueDate,
             )}`,
-            type: "Milestone",
+            type: "Milestone" as const,
             dueAt: milestone.dueDate,
             href: `/projects/${milestone.projectId}`,
             entityType: "milestone" as const,
@@ -107,7 +107,7 @@ export default function DashboardPage() {
             meta: `${contact?.company ?? "Client"} - Due ${formatDateShort(
               invoice.dueDate,
             )}`,
-            type: "Invoice",
+            type: "Invoice" as const,
             dueAt: invoice.dueDate,
             href: `/invoices/${invoice.id}`,
             entityType: "invoice" as const,

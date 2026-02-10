@@ -12,7 +12,7 @@ import { Bell, CalendarClock, CheckCircle2, FileText, FolderKanban, MoveRight } 
 import { DisableIfNoPermission } from "@/components/common/PermissionGate";
 import { useActivity } from "@/lib/activityStore";
 
-type FocusItem = {
+export type FocusItem = {
   id: string;
   title: string;
   meta: string;
