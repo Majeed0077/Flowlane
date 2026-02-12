@@ -113,7 +113,7 @@ export function Sidebar({ initialRole }: { initialRole?: "owner" | "editor" | nu
           >
             {collapsed ? (
               <Image
-                src="/icon a.png"
+                src="/Icon a.png"
                 alt="ScopeBoard"
                 width={32}
                 height={32}
@@ -248,5 +248,7 @@ export function Sidebar({ initialRole }: { initialRole?: "owner" | "editor" | nu
     </aside>
   );
 }
+
+
 
 

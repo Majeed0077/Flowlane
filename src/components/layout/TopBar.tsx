@@ -75,6 +75,7 @@ export function TopBar({
     invoices: [],
   });
   const searchRef = useRef<HTMLDivElement | null>(null);
+  const hasInitialHeaderData = Boolean(initialUser) && initialWorkspaces.length > 0 && Boolean(initialActiveWorkspaceId);
 
   const handleQuickAddChange = (next: boolean) => {
     if (next) {
@@ -138,7 +139,9 @@ export function TopBar({
       }
     }
 
-    loadHeaderData().catch(() => undefined);
+    if (!hasInitialHeaderData) {
+      loadHeaderData().catch(() => undefined);
+    }
 
     function handleHeaderRefresh() {
       loadHeaderData().catch(() => undefined);
@@ -151,7 +154,7 @@ export function TopBar({
       window.removeEventListener("scopeboard-profile-updated", handleHeaderRefresh);
       window.removeEventListener("scopeboard-workspace-updated", handleHeaderRefresh as EventListener);
     };
-  }, []);
+  }, [hasInitialHeaderData]);
 
   useEffect(() => {
     const term = query.trim();
@@ -510,6 +513,8 @@ export function TopBar({
     </>
   );
 }
+
+
 
 
 
