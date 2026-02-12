@@ -16,6 +16,7 @@ type SessionPayload = {
   email: string;
   name: string;
   tokenVersion: number;
+  defaultLandingPage?: "today" | "dashboard";
 };
 
 export type Session = {

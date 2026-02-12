@@ -9,6 +9,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
+type AuthSession = {
+  role?: "owner" | "editor";
+  defaultLandingPage?: "today" | "dashboard";
+};
+
+function getLandingPath(session?: AuthSession | null) {
+  return session?.defaultLandingPage === "dashboard" ? "/dashboard" : "/today";
+}
+
 export default function SignUpPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -19,14 +28,14 @@ export default function SignUpPage() {
   const [email, setEmail] = useState(inviteEmail);
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [existingRole, setExistingRole] = useState<"owner" | "editor" | null>(null);
+  const [existingSession, setExistingSession] = useState<AuthSession | null>(null);
 
   React.useEffect(() => {
     fetch("/api/auth/me")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.success && data?.data?.role) {
-          setExistingRole(data.data.role);
+          setExistingSession(data.data as AuthSession);
         }
       })
       .catch(() => undefined);
@@ -55,9 +64,7 @@ export default function SignUpPage() {
     }
 
     const me = await fetch("/api/auth/me").then((res) => res.json()).catch(() => null);
-    const role = me?.data?.role;
-    if (role === "owner") router.push("/owner");
-    else router.push("/editor");
+    router.push(getLandingPath(me?.data));
   }
 
   return (
@@ -138,13 +145,13 @@ export default function SignUpPage() {
                 {loading ? "Creating account..." : "Sign up"}
               </Button>
             </form>
-            {existingRole ? (
+            {existingSession ? (
               <div className="rounded-2xl border border-dashed p-4 text-xs text-muted-foreground">
                 You are already signed in.
                 <Button
                   variant="ghost"
                   className="px-1 text-xs"
-                  onClick={() => router.push(existingRole === "owner" ? "/owner" : "/editor")}
+                  onClick={() => router.push(getLandingPath(existingSession))}
                 >
                   Go to dashboard
                 </Button>

@@ -14,6 +14,7 @@ export async function GET() {
       email: user.email,
       role: user.role,
       avatarUrl: user.avatarUrl ?? "",
+      defaultLandingPage: user.defaultLandingPage ?? "today",
     },
   });
 }

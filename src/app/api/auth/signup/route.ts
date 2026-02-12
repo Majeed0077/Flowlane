@@ -99,6 +99,8 @@ export async function POST(request: Request) {
       acceptedUserId: String(existing._id),
     });
 
+    const defaultLandingPage = existing.defaultLandingPage === "dashboard" ? "dashboard" : "today";
+
     const sessionToken = await createSessionToken({
       userId: String(existing._id),
       workspaceId: String(existing.workspaceId),
@@ -106,6 +108,7 @@ export async function POST(request: Request) {
       email: existing.email,
       name: existing.name,
       tokenVersion: typeof existing.tokenVersion === "number" ? existing.tokenVersion : 0,
+      defaultLandingPage,
     });
 
     const response = NextResponse.json({
@@ -115,6 +118,7 @@ export async function POST(request: Request) {
         name: existing.name,
         email: existing.email,
         role: existing.role.toLowerCase() === "owner" ? "owner" : "editor",
+        defaultLandingPage,
       },
     });
 
@@ -189,6 +193,7 @@ export async function POST(request: Request) {
     meta: created.email,
   });
 
+  const defaultLandingPage: "today" | "dashboard" = "today";
   const sessionToken = await createSessionToken({
     userId: String(created._id),
     workspaceId: personalWorkspaceId,
@@ -196,6 +201,7 @@ export async function POST(request: Request) {
     email: created.email,
     name: created.name,
     tokenVersion: 0,
+    defaultLandingPage,
   });
 
   const response = NextResponse.json({
@@ -205,6 +211,7 @@ export async function POST(request: Request) {
       name: created.name,
       email: created.email,
       role: "owner",
+      defaultLandingPage,
     },
   });
 

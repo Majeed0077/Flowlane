@@ -53,7 +53,6 @@ export async function POST(request: Request) {
 
   const match = await verifyPassword(parsed.data.password, user.passwordHash);
   if (!match) {
-    // Backward compatibility for legacy seeded/plain password rows.
     if (user.passwordHash !== parsed.data.password) {
       return NextResponse.json({ success: false, error: "Invalid credentials." }, { status: 401 });
     }
@@ -62,6 +61,8 @@ export async function POST(request: Request) {
   }
 
   const normalizedRole = user.role.toLowerCase() === "owner" ? "owner" : "editor";
+  const defaultLandingPage = user.defaultLandingPage === "dashboard" ? "dashboard" : "today";
+
   const sessionToken = await createSessionToken({
     userId: String(user._id),
     workspaceId: String(user.workspaceId),
@@ -69,6 +70,7 @@ export async function POST(request: Request) {
     email: user.email,
     name: user.name,
     tokenVersion: typeof user.tokenVersion === "number" ? user.tokenVersion : 0,
+    defaultLandingPage,
   });
 
   const response = NextResponse.json({
@@ -78,6 +80,7 @@ export async function POST(request: Request) {
       name: user.name,
       email: user.email,
       role: normalizedRole,
+      defaultLandingPage,
     },
   });
 

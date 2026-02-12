@@ -32,7 +32,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <AppProviders>
-      <div className="flex h-screen w-full overflow-hidden">
+      <div className="flex h-screen w-full overflow-hidden" data-vf-role={initialRole ?? undefined}>
         <Sidebar initialRole={initialRole} />
         <div className="flex flex-1 flex-col">
           <TopBar
@@ -49,3 +49,4 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
     </AppProviders>
   );
 }
+

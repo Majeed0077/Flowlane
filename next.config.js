@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  distDir: ".next-cache",
   eslint: {
     // Keep CI/deploy unblocked while existing lint debt is cleaned incrementally.
     ignoreDuringBuilds: true,
@@ -21,4 +22,3 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
-

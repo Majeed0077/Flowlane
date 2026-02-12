@@ -90,6 +90,21 @@ export function TopBar({
     setProjectOpen(next);
   };
 
+
+  useEffect(() => {
+    const routes = [
+      "/today",
+      "/dashboard",
+      "/crm",
+      "/contacts",
+      "/projects",
+      "/profile",
+      "/settings/account",
+      "/settings/workspace",
+    ];
+    routes.forEach((route) => router.prefetch(route));
+  }, [router]);
+
   useEffect(() => {
     if (!searchOpen) return;
     function onMouseDown(event: MouseEvent) {
@@ -194,7 +209,6 @@ export function TopBar({
       }
       setActiveWorkspaceId(workspaceId);
       router.refresh();
-      window.location.reload();
     } catch (error) {
       console.error(error);
     } finally {
@@ -498,6 +512,11 @@ export function TopBar({
     </>
   );
 }
+
+
+
+
+
 
 
 

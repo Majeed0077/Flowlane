@@ -10,19 +10,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
+type AuthSession = {
+  role?: "owner" | "editor";
+  defaultLandingPage?: "today" | "dashboard";
+};
+
+function getLandingPath(session?: AuthSession | null) {
+  return session?.defaultLandingPage === "dashboard" ? "/dashboard" : "/today";
+}
+
 export default function SignInPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [existingRole, setExistingRole] = useState<"owner" | "editor" | null>(null);
+  const [existingSession, setExistingSession] = useState<AuthSession | null>(null);
 
   React.useEffect(() => {
     fetch("/api/auth/me")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.success && data?.data?.role) {
-          setExistingRole(data.data.role);
+          setExistingSession(data.data as AuthSession);
         }
       })
       .catch(() => undefined);
@@ -45,9 +54,7 @@ export default function SignInPage() {
     }
 
     const me = await fetch("/api/auth/me").then((res) => res.json()).catch(() => null);
-    const role = me?.data?.role;
-    if (role === "owner") router.push("/owner");
-    else router.push("/editor");
+    router.push(getLandingPath(me?.data));
   }
 
   return (
@@ -67,7 +74,7 @@ export default function SignInPage() {
               </h1>
               <p className="max-w-md text-sm text-muted-foreground">
                 Today-first tasks, clean pipeline handoffs, and shared context for
-                every client—without the noise.
+                every client without the noise.
               </p>
             </div>
             <div className="grid gap-4 text-sm text-muted-foreground">
@@ -121,13 +128,13 @@ export default function SignInPage() {
                 {loading ? "Signing in..." : "Sign in"}
               </Button>
             </form>
-            {existingRole ? (
+            {existingSession ? (
               <div className="rounded-2xl border border-dashed p-4 text-xs text-muted-foreground">
                 You are already signed in.
                 <Button
                   variant="ghost"
                   className="px-1 text-xs"
-                  onClick={() => router.push(existingRole === "owner" ? "/owner" : "/editor")}
+                  onClick={() => router.push(getLandingPath(existingSession))}
                 >
                   Go to dashboard
                 </Button>

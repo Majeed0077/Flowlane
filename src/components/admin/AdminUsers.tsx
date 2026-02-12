@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { api, type AdminInvite, type AdminUser } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -53,6 +54,7 @@ export function AdminUsers({
   const [inviteRole, setInviteRole] = useState<"Owner" | "Editor">("Editor");
   const [workspaceName, setWorkspaceName] = useState(initialWorkspaceName);
   const [workspaceLogo, setWorkspaceLogo] = useState(initialWorkspaceLogo ?? "");
+  const router = useRouter();
   const [renaming, setRenaming] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
   const logoInputRef = useRef<HTMLInputElement | null>(null);
@@ -281,7 +283,7 @@ export function AdminUsers({
           detail: { workspaceId: result.switchedWorkspaceId },
         }),
       );
-      window.location.reload();
+      router.refresh();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Unable to delete team.";
       toast.error(message);
@@ -574,6 +576,8 @@ export function AdminUsers({
     </div>
   );
 }
+
+
 
 
 

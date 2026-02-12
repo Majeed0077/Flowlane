@@ -7,6 +7,14 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
+type AuthSession = {
+  defaultLandingPage?: "today" | "dashboard";
+};
+
+function getLandingPath(session?: AuthSession | null) {
+  return session?.defaultLandingPage === "dashboard" ? "/dashboard" : "/today";
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -30,9 +38,7 @@ export default function LoginPage() {
     }
 
     const me = await fetch("/api/auth/me").then((res) => res.json()).catch(() => null);
-    const role = me?.data?.role;
-    if (role === "owner") router.push("/owner");
-    else router.push("/editor");
+    router.push(getLandingPath(me?.data));
   }
 
   return (
