@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GripVertical, MoreHorizontal } from "lucide-react";
 import type { Project, ProjectStatus } from "@/types";
@@ -57,6 +57,22 @@ export function ProjectsList({
   const { setProjects } = useLocalData();
   const canMove = hasPermission(role, "projects:edit");
   const canDelete = hasPermission(role, "projects:delete");
+  const [teamMembers, setTeamMembers] = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    fetch("/api/admin/users")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data?.success || !Array.isArray(data.data)) return;
+        setTeamMembers(
+          data.data.map((item: { id: string; name: string }) => ({
+            id: item.id,
+            name: item.name,
+          })),
+        );
+      })
+      .catch(() => undefined);
+  }, []);
 
   const filtered = useMemo(() => {
     const byStatus = status === "all" ? projects : projects.filter((project) => project.status === status);
@@ -166,7 +182,7 @@ export function ProjectsList({
               href={`/projects/${project.id}`}
               className="rounded-xl border bg-background p-5 shadow-sm transition hover:bg-muted/40"
             >
-              <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold">{project.title}</p>
                   <p className="text-xs text-muted-foreground">
@@ -175,6 +191,7 @@ export function ProjectsList({
                 </div>
                 <ProjectStatusBadge status={project.status} />
               </div>
+              <ProjectCardMeta project={project} teamMembers={teamMembers} compact />
               <div className="mt-4 text-xs text-muted-foreground">
                 Budget{" "}
                 {isOwner
@@ -203,6 +220,7 @@ export function ProjectsList({
                       canDelete={canDelete}
                       isOwner={isOwner}
                       budgetTier={budgetTierById?.[project.id]}
+                      teamMembers={teamMembers}
 
 
                       onDelete={async () => {
@@ -268,6 +286,7 @@ function ProjectCard({
   canDelete,
   isOwner,
   budgetTier,
+  teamMembers,
   onDelete,
 }: {
   project: Project;
@@ -275,6 +294,7 @@ function ProjectCard({
   canDelete: boolean;
   isOwner: boolean;
   budgetTier?: "Low" | "Medium" | "High";
+  teamMembers: { id: string; name: string }[];
   onDelete: () => void;
 }) {
   const router = useRouter();
@@ -359,8 +379,89 @@ function ProjectCard({
             ? formatMoney(project.budgetAmount ?? 0, project.currency ?? "USD")
             : budgetTier ?? "Hidden"}
         </div>
+        <ProjectCardMeta project={project} teamMembers={teamMembers} />
       </div>
     </Card>
+  );
+}
+
+function ProjectCardMeta({
+  project,
+  teamMembers,
+  compact = false,
+}: {
+  project: Project;
+  teamMembers: { id: string; name: string }[];
+  compact?: boolean;
+}) {
+  const logos = project.logos ?? [];
+  const checklist = project.checklist ?? [];
+  const completedChecklist = checklist.filter((item) => item.done).length;
+  const assignees = (project.assigneeIds ?? [])
+    .map((id) => teamMembers.find((member) => member.id === id))
+    .filter((member): member is { id: string; name: string } => Boolean(member));
+
+  return (
+    <div className={cn("mt-3 space-y-3", compact && "mt-4")}>
+      <div className="flex items-center gap-3">
+        {logos.length > 0 ? (
+          <img
+            src={logos[0].url}
+            alt={logos[0].name || project.title}
+            className={cn(
+              "rounded-md border object-cover",
+              compact ? "h-10 w-10" : "h-12 w-12",
+            )}
+          />
+        ) : (
+          <div
+            className={cn(
+              "flex items-center justify-center rounded-md border bg-muted/50 text-[10px] font-semibold text-muted-foreground",
+              compact ? "h-10 w-10" : "h-12 w-12",
+            )}
+          >
+            {project.title.charAt(0).toUpperCase()}
+          </div>
+        )}
+
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            {assignees.length > 0 ? (
+              assignees.slice(0, compact ? 2 : 3).map((assignee) => (
+                <span
+                  key={assignee.id}
+                  className="rounded-full border px-2 py-0.5 text-[11px] text-muted-foreground"
+                >
+                  {assignee.name}
+                </span>
+              ))
+            ) : (
+              <span className="text-[11px] text-muted-foreground">No assignee</span>
+            )}
+            {assignees.length > (compact ? 2 : 3) ? (
+              <span className="text-[11px] text-muted-foreground">
+                +{assignees.length - (compact ? 2 : 3)}
+              </span>
+            ) : null}
+          </div>
+
+          <div className="mt-2 flex items-center gap-2 text-[11px] text-muted-foreground">
+            <span>Checklist</span>
+            <div className="h-1.5 flex-1 rounded-full bg-muted">
+              <div
+                className="h-1.5 rounded-full bg-emerald-500"
+                style={{
+                  width: `${checklist.length === 0 ? 0 : (completedChecklist / checklist.length) * 100}%`,
+                }}
+              />
+            </div>
+            <span>
+              {completedChecklist}/{checklist.length}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
