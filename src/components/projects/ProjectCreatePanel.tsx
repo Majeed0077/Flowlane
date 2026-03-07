@@ -48,18 +48,41 @@ export function ProjectCreatePanel({
   const [currency, setCurrency] = React.useState("USD");
   const [notes, setNotes] = React.useState("");
   const [linksText, setLinksText] = React.useState("");
+  const [assigneeIds, setAssigneeIds] = React.useState<string[]>([]);
   const [attachments, setAttachments] = React.useState<
     { id?: string; name: string; url: string; type: string; size: number }[]
   >([]);
+  const [logos, setLogos] = React.useState<
+    { id?: string; name: string; url: string; type: string; size: number }[]
+  >([]);
+  const [users, setUsers] = React.useState<{ id: string; name: string; role: string }[]>([]);
   const [uploading, setUploading] = React.useState(false);
+  const [uploadingLogos, setUploadingLogos] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const logoInputRef = React.useRef<HTMLInputElement | null>(null);
 
   const canSave = title.trim().length > 0;
 
   React.useEffect(() => {
     if (!newContactFollowUp) setNewContactFollowUp(getDefaultFollowupDate());
   }, [newContactFollowUp]);
+
+  React.useEffect(() => {
+    fetch("/api/admin/users")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data?.success || !Array.isArray(data.data)) return;
+        setUsers(
+          data.data.map((item: { id: string; name: string; role: string }) => ({
+            id: item.id,
+            name: item.name,
+            role: item.role,
+          })),
+        );
+      })
+      .catch(() => undefined);
+  }, []);
 
   React.useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -121,7 +144,9 @@ export function ProjectCreatePanel({
       startDate: new Date().toISOString(),
       notes: notes.trim() || undefined,
       links: links.length ? links : undefined,
+      assigneeIds: assigneeIds.length ? assigneeIds : undefined,
       attachments: attachments.length ? attachments : undefined,
+      logos: logos.length ? logos : undefined,
       archived: false,
       ...(isOwner
         ? {
@@ -159,7 +184,9 @@ export function ProjectCreatePanel({
       setCurrency("USD");
       setNotes("");
       setLinksText("");
+      setAssigneeIds([]);
       setAttachments([]);
+      setLogos([]);
     } catch {
       toast.error("Unable to create project.");
     } finally {
@@ -167,9 +194,17 @@ export function ProjectCreatePanel({
     }
   }
 
-  async function uploadFiles(files: File[]) {
+  async function uploadFiles(
+    files: File[],
+    setter: React.Dispatch<
+      React.SetStateAction<
+        { id?: string; name: string; url: string; type: string; size: number }[]
+      >
+    >,
+    setBusy: React.Dispatch<React.SetStateAction<boolean>>,
+  ) {
     if (files.length === 0) return;
-    setUploading(true);
+    setBusy(true);
     try {
       const formData = new FormData();
       files.forEach((file) => formData.append("files", file));
@@ -179,18 +214,24 @@ export function ProjectCreatePanel({
         throw new Error(json?.error ?? "Upload failed");
       }
       const uploaded = Array.isArray(json.data) ? json.data : [];
-      setAttachments((prev) => [...prev, ...uploaded]);
+      setter((prev) => [...prev, ...uploaded]);
       toast.success("Files uploaded.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Upload failed.");
     } finally {
-      setUploading(false);
+      setBusy(false);
     }
   }
 
   function handleFilesSelected(event: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? []);
-    void uploadFiles(files);
+    void uploadFiles(files, setAttachments, setUploading);
+    event.target.value = "";
+  }
+
+  function handleLogoSelected(event: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? []);
+    void uploadFiles(files, setLogos, setUploadingLogos);
     event.target.value = "";
   }
 
@@ -233,12 +274,15 @@ export function ProjectCreatePanel({
     setNewContactFollowUp(getDefaultFollowupDate());
   }
 
-  async function handleRemoveAttachment(
+  async function handleRemoveFile(
     file: { id?: string; name: string; url: string; type: string; size: number },
     index: number,
+    source: "attachments" | "logos",
   ) {
-    const previous = attachments;
-    setAttachments((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
+    const current = source === "attachments" ? attachments : logos;
+    const previous = current;
+    const setter = source === "attachments" ? setAttachments : setLogos;
+    setter((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
     try {
       const response = await fetch("/api/uploads", {
         method: "DELETE",
@@ -249,10 +293,10 @@ export function ProjectCreatePanel({
       if (!json?.success) {
         throw new Error(json?.error ?? "Unable to delete file");
       }
-      toast.success("Attachment removed.");
+      toast.success(source === "attachments" ? "Attachment removed." : "Logo removed.");
     } catch (error) {
-      setAttachments(previous);
-      toast.error(error instanceof Error ? error.message : "Unable to remove attachment.");
+      setter(previous);
+      toast.error(error instanceof Error ? error.message : "Unable to remove file.");
     }
   }
 
@@ -413,6 +457,35 @@ export function ProjectCreatePanel({
                   onChange={(event) => setDueDate(event.target.value)}
                 />
               </div>
+              <div className="space-y-2">
+                <Label>Assignees</Label>
+                <div className="flex flex-wrap gap-2 rounded-xl border bg-background p-3">
+                  {users.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No team members loaded.</p>
+                  ) : (
+                    users.map((user) => {
+                      const active = assigneeIds.includes(user.id);
+                      return (
+                        <Button
+                          key={user.id}
+                          type="button"
+                          variant={active ? "default" : "outline"}
+                          size="sm"
+                          onClick={() =>
+                            setAssigneeIds((prev) =>
+                              prev.includes(user.id)
+                                ? prev.filter((id) => id !== user.id)
+                                : [...prev, user.id],
+                            )
+                          }
+                        >
+                          {user.name}
+                        </Button>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
             </div>
 
             {isOwner ? (
@@ -466,6 +539,77 @@ export function ProjectCreatePanel({
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label>Project logos</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Add multiple brand marks or covers for this project.
+                  </p>
+                  <div
+                    className="rounded-xl border border-dashed border-border bg-background px-4 py-6 text-sm text-muted-foreground"
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      void uploadFiles(
+                        Array.from(event.dataTransfer.files ?? []),
+                        setLogos,
+                        setUploadingLogos,
+                      );
+                    }}
+                    onClick={() => logoInputRef.current?.click()}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        logoInputRef.current?.click();
+                      }
+                    }}
+                  >
+                    <p className="font-medium text-foreground">
+                      {uploadingLogos ? "Uploading logos..." : "Drag & drop logos here or click to upload"}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      PNG, JPG, WEBP supported. Multiple files supported.
+                    </p>
+                  </div>
+                  <input
+                    ref={logoInputRef}
+                    type="file"
+                    multiple
+                    accept=".png,.jpg,.jpeg,.webp"
+                    className="hidden"
+                    onChange={handleLogoSelected}
+                  />
+                  {logos.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No logos yet.</p>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-3">
+                      {logos.map((file, index) => (
+                        <div
+                          key={`${file.url}-${index}`}
+                          className="rounded-lg border bg-background p-2 text-xs"
+                        >
+                          <img
+                            src={file.url}
+                            alt={file.name}
+                            className="h-24 w-full rounded-md object-cover"
+                          />
+                          <div className="mt-2 flex items-center justify-between gap-2">
+                            <span className="truncate font-medium text-foreground">{file.name}</span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveFile(file, index, "logos")}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
                   <Label>Attachments</Label>
                   <p className="text-xs text-muted-foreground">
                     Upload files (PDF, DOCX, XLSX, images).
@@ -475,7 +619,11 @@ export function ProjectCreatePanel({
                     onDragOver={(event) => event.preventDefault()}
                     onDrop={(event) => {
                       event.preventDefault();
-                      void uploadFiles(Array.from(event.dataTransfer.files ?? []));
+                      void uploadFiles(
+                        Array.from(event.dataTransfer.files ?? []),
+                        setAttachments,
+                        setUploading,
+                      );
                     }}
                     onClick={() => fileInputRef.current?.click()}
                     role="button"
@@ -517,14 +665,14 @@ export function ProjectCreatePanel({
                               {(file.size / 1024).toFixed(1)} KB
                             </p>
                           </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemoveAttachment(file, index)}
-                          >
-                            Remove
-                          </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveFile(file, index, "attachments")}
+                            >
+                              Remove
+                            </Button>
                         </div>
                       ))}
                     </div>

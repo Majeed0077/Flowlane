@@ -6,6 +6,7 @@ import { AuditModel } from "@/lib/models/audit";
 import { requireSession } from "@/lib/auth";
 import { adminUserUpdateSchema } from "@/lib/validation";
 import { hashPassword } from "@/lib/password";
+import { normalizeRole, toDisplayRole } from "@/lib/rbac";
 
 async function requireOwnerSession(req: Request) {
   const session = await requireSession(req);
@@ -78,7 +79,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
         id: String(updated._id),
         name: updated.name,
         email: updated.email,
-        role: updated.role === "owner" ? "Owner" : "Editor",
+        role: toDisplayRole(normalizeRole(updated.role)),
         isActive: updated.isActive,
         isDirect: true,
         isSelf: String(updated._id) === session.userId,
@@ -99,7 +100,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
   const membershipUpdates: Record<string, unknown> = {};
   if (parsed.data.role) {
-    membershipUpdates.role = parsed.data.role === "Owner" ? "owner" : "editor";
+    membershipUpdates.role = normalizeRole(parsed.data.role);
   }
   if (typeof parsed.data.isActive === "boolean") {
     membershipUpdates.isActive = parsed.data.isActive;
@@ -137,12 +138,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       id: String(targetUser._id),
       name: targetUser.name,
       email: targetUser.email,
-      role:
-        updatedMembership?.role === "owner"
-          ? "Owner"
-          : updatedMembership?.role === "editor"
-            ? "Editor"
-            : "Editor",
+      role: toDisplayRole(normalizeRole(String(updatedMembership?.role ?? "member"))),
       isActive: Boolean(updatedMembership?.isActive && targetUser.isActive),
       isDirect: false,
       isSelf: String(targetUser._id) === session.userId,

@@ -13,10 +13,10 @@ export const users: User[] = [
   },
   {
     id: "u-002",
-    name: "ScopeBoard Editor",
-    email: "editor@flowlane.local",
+    name: "ScopeBoard Member",
+    email: "member@flowlane.local",
     passwordHash: "<seeded-in-db>",
-    role: "editor",
+    role: "member",
     active: true,
   },
 ];

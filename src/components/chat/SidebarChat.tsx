@@ -37,7 +37,7 @@ export function SidebarChat({ fullHeight = false }: { fullHeight?: boolean }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [users, setUsers] = useState<string[]>(["owner", "editor"]);
+  const [users, setUsers] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [trigger, setTrigger] = useState<"@" | "#" | null>(null);
   const [query, setQuery] = useState("");
@@ -202,7 +202,7 @@ export function SidebarChat({ fullHeight = false }: { fullHeight?: boolean }) {
                 }`}
               >
                 <div className="text-[11px] text-muted-foreground">
-                  {msg.senderName} · {formatDate(msg.createdAt)}
+                  {msg.senderName} - {formatDate(msg.createdAt)}
                 </div>
                 <div className="text-xs text-foreground">
                   {highlightMentions(msg.body)}
@@ -271,3 +271,4 @@ export function SidebarChat({ fullHeight = false }: { fullHeight?: boolean }) {
     </div>
   );
 }
+

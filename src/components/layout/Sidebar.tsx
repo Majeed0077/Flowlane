@@ -23,6 +23,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useLocalData } from "@/lib/localDataStore";
 import { toast } from "sonner";
+import type { Role } from "@/lib/rbac";
 
 const navItems = [
   { href: "/chat", label: "Chat", icon: MessageCircle },
@@ -40,11 +41,11 @@ const ownerItems = [
   { href: "/admin/backup", label: "Backup", icon: Database },
 ];
 
-export function Sidebar({ initialRole }: { initialRole?: "owner" | "editor" | null }) {
+export function Sidebar({ initialRole }: { initialRole?: Role | null }) {
   const pathname = usePathname();
   const safePathname = pathname ?? "";
   const router = useRouter();
-  const [role, setRole] = useState<"owner" | "editor" | null>(initialRole ?? null);
+  const [role, setRole] = useState<Role | null>(initialRole ?? null);
   const isOwner = role === "owner";
   const visibleNavItems = useMemo(
     () => (isOwner ? [...navItems, ...ownerNavItems] : navItems),

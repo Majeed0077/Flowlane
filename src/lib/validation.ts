@@ -45,6 +45,38 @@ export const projectCreateSchema = z.object({
       }),
     )
     .optional(),
+  logos: z
+    .array(
+      z.object({
+        id: z.string().optional(),
+        name: z.string().min(1),
+        url: z.string().min(1),
+        type: z.string().optional().default(""),
+        size: z.number().nonnegative(),
+      }),
+    )
+    .optional(),
+  assigneeIds: z.array(z.string().min(1)).optional(),
+  comments: z
+    .array(
+      z.object({
+        id: z.string(),
+        body: z.string().min(1),
+        authorId: z.string().min(1),
+        authorName: z.string().min(1),
+        createdAt: z.string(),
+      }),
+    )
+    .optional(),
+  checklist: z
+    .array(
+      z.object({
+        id: z.string(),
+        title: z.string().min(1),
+        done: z.boolean(),
+      }),
+    )
+    .optional(),
   startDate: z.string().optional(),
   dueDate: z.string().optional(),
   budgetAmount: z.number().optional(),
@@ -124,13 +156,13 @@ export const auditCreateSchema = z.object({
 export const adminUserCreateSchema = z.object({
   name: z.string().min(1),
   email: z.string().email(),
-  role: z.enum(["Owner", "Editor"]),
+  role: z.enum(["Owner", "Admin", "Member", "Guest"]),
   password: z.string().min(8),
 });
 
 export const adminUserUpdateSchema = z.object({
   name: z.string().min(1).optional(),
-  role: z.enum(["Owner", "Editor"]).optional(),
+  role: z.enum(["Owner", "Admin", "Member", "Guest"]).optional(),
   isActive: z.boolean().optional(),
   password: z.string().min(8).optional(),
 });
@@ -178,7 +210,7 @@ export const userPasswordUpdateSchema = z
 export const teamInviteCreateSchema = z.object({
   email: z.string().email(),
   name: z.string().optional().or(z.literal("")),
-  role: z.enum(["Owner", "Editor"]),
+  role: z.enum(["Owner", "Admin", "Member", "Guest"]),
 });
 
 export const teamInviteUpdateSchema = z.object({

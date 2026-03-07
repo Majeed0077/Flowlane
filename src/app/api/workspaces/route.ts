@@ -5,6 +5,7 @@ import { requireSession } from "@/lib/auth";
 import { UserModel } from "@/lib/models/user";
 import { WorkspaceModel } from "@/lib/models/workspace";
 import { WorkspaceMembershipModel } from "@/lib/models/workspaceMembership";
+import { normalizeRole } from "@/lib/rbac";
 
 export async function GET(req: Request) {
   let session;
@@ -59,7 +60,9 @@ export async function GET(req: Request) {
   const data = workspaceIds.map((id) => {
     const workspace = workspaces.find((item) => String(item._id) === id);
     const membership = memberships.find((item) => item.workspaceId === id);
-    const role = id === user.workspaceId ? "owner" : membership?.role ?? "editor";
+    const role = id === user.workspaceId
+      ? normalizeRole(String(user.role))
+      : normalizeRole(String(membership?.role ?? "member"));
 
     return {
       id,

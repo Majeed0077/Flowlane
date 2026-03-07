@@ -16,13 +16,13 @@ function readRoleFromDom(): Role | null {
   if (typeof document === "undefined") return null;
   const container = document.querySelector("[data-vf-role]");
   const raw = container?.getAttribute("data-vf-role");
-  if (raw === "owner" || raw === "editor") return raw;
+  if (raw === "owner" || raw === "admin" || raw === "member" || raw === "guest") return raw;
   return null;
 }
 
 export function useRole() {
   // Keep initial render deterministic between server and client.
-  const [role, setRole] = useState<Role>(() => cachedRole ?? "editor");
+  const [role, setRole] = useState<Role>(() => cachedRole ?? "member");
 
   useEffect(() => {
     const domRole = readRoleFromDom();

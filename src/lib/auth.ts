@@ -3,7 +3,7 @@ import { jwtVerify, SignJWT } from "jose";
 import { UserModel } from "@/lib/models/user";
 import { WorkspaceModel } from "@/lib/models/workspace";
 import { WorkspaceMembershipModel } from "@/lib/models/workspaceMembership";
-import type { Role } from "@/lib/rbac";
+import { normalizeRole, type Role } from "@/lib/rbac";
 import { dbConnect } from "@/lib/db";
 
 const COOKIE_NAME = "scopeboard_session";
@@ -39,7 +39,7 @@ export type WorkspaceSummary = {
   id: string;
   name: string;
   logoUrl: string;
-  role: "owner" | "editor";
+  role: Role;
   isPersonal: boolean;
   isActive: boolean;
 };
@@ -48,10 +48,6 @@ function getJwtSecret() {
   const secret = process.env.JWT_SECRET;
   if (!secret) throw new Error("JWT_SECRET is not defined");
   return new TextEncoder().encode(secret);
-}
-
-function normalizeRole(role: string): Role {
-  return role.toLowerCase() === "owner" ? "owner" : "editor";
 }
 
 function parseCookieValue(cookieHeader: string | null, name: string) {
@@ -104,7 +100,7 @@ async function resolveWorkspaceRole(
 
   return {
     workspaceId: activeWorkspaceId,
-    role: membership.role === "owner" ? "owner" : "editor",
+    role: normalizeRole(String(membership.role)),
     email: user.email,
     name: user.name,
     tokenVersion: typeof user.tokenVersion === "number" ? user.tokenVersion : 0,
@@ -160,9 +156,9 @@ export async function requireSession(req: Request): Promise<Session> {
   return session;
 }
 
-export async function requireRole(req: Request, role: "Owner" | "Editor") {
+export async function requireRole(req: Request, role: "Owner" | "Admin" | "Member" | "Guest") {
   const session = await requireSession(req);
-  const expected: Role = role.toLowerCase() === "owner" ? "owner" : "editor";
+  const expected: Role = normalizeRole(role);
   if (session.role !== expected) {
     throw new Error("Forbidden");
   }
@@ -268,7 +264,9 @@ export async function getCurrentWorkspaces(): Promise<WorkspaceSummary[]> {
   return workspaceIds.map((id) => {
     const workspace = workspaces.find((item) => String(item._id) === id);
     const membership = memberships.find((item) => String(item.workspaceId) === id);
-    const role = id === String(user.workspaceId) ? "owner" : membership?.role === "owner" ? "owner" : "editor";
+    const role = id === String(user.workspaceId)
+      ? normalizeRole(String(user.role))
+      : normalizeRole(String(membership?.role ?? "member"));
 
     return {
       id,

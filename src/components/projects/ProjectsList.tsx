@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal } from "lucide-react";
+import { GripVertical, MoreHorizontal } from "lucide-react";
 import type { Project, ProjectStatus } from "@/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ProjectStatusBadge } from "@/components/common/StatusBadge";
@@ -281,12 +281,11 @@ function ProjectCard({
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: project.id,
   });
-  const dragProps = canMove ? { ...listeners, ...attributes } : {};
-
   function handleCardClick(event: React.MouseEvent<HTMLDivElement>) {
     if (isDragging) return;
     const target = event.target as HTMLElement;
     if (target.closest("[data-project-menu]")) return;
+    if (target.closest("[data-project-drag-handle]")) return;
     router.push(`/projects/${project.id}`);
   }
 
@@ -300,7 +299,6 @@ function ProjectCard({
         isDragging && "opacity-60",
       )}
       onClick={handleCardClick}
-      {...dragProps}
     >
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-2">
@@ -311,6 +309,19 @@ function ProjectCard({
             </p>
           </div>
           <div className="flex items-center gap-1" data-project-menu onPointerDown={(event) => event.stopPropagation()}>
+            {canMove ? (
+              <button
+                type="button"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                data-project-drag-handle
+                aria-label="Drag project card"
+                {...listeners}
+                {...attributes}
+                onClick={(event) => event.stopPropagation()}
+              >
+                <GripVertical className="h-4 w-4" />
+              </button>
+            ) : null}
             <ProjectStatusBadge status={project.status} />
 
 

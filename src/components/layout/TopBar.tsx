@@ -26,10 +26,11 @@ type SearchResult = {
   contacts: { id: string; name: string; company?: string }[];
   projects: { id: string; title: string }[];
   invoices: { id: string; invoiceNo: string }[];
+  milestones: { id: string; title: string; projectId: string }[];
 };
 
 type HeaderUser = {
-  role: "owner" | "editor";
+  role: "owner" | "admin" | "member" | "guest";
   name?: string;
   avatarUrl?: string;
 };
@@ -38,7 +39,7 @@ type WorkspaceItem = {
   id: string;
   name: string;
   logoUrl?: string;
-  role: "owner" | "editor";
+  role: "owner" | "admin" | "member" | "guest";
   isPersonal: boolean;
   isActive: boolean;
 };
@@ -49,7 +50,7 @@ export function TopBar({
   initialWorkspaces = [],
   initialActiveWorkspaceId = "",
 }: {
-  initialRole?: "owner" | "editor" | null;
+  initialRole?: "owner" | "admin" | "member" | "guest" | null;
   initialUser?: HeaderUser | null;
   initialWorkspaces?: WorkspaceItem[];
   initialActiveWorkspaceId?: string;
@@ -73,6 +74,7 @@ export function TopBar({
     contacts: [],
     projects: [],
     invoices: [],
+    milestones: [],
   });
   const searchRef = useRef<HTMLDivElement | null>(null);
   const hasInitialHeaderData = Boolean(initialUser) && initialWorkspaces.length > 0 && Boolean(initialActiveWorkspaceId);
@@ -159,7 +161,7 @@ export function TopBar({
   useEffect(() => {
     const term = query.trim();
     if (term.length < 2) {
-      setResults({ contacts: [], projects: [], invoices: [] });
+      setResults({ contacts: [], projects: [], invoices: [], milestones: [] });
       setSearchOpen(false);
       return;
     }
@@ -179,7 +181,7 @@ export function TopBar({
   }, [query]);
 
   const totalResults = useMemo(
-    () => results.contacts.length + results.projects.length + results.invoices.length,
+    () => results.contacts.length + results.projects.length + results.invoices.length + results.milestones.length,
     [results],
   );
 
@@ -266,7 +268,7 @@ export function TopBar({
           <Search className="h-4 w-4" />
           <Input
             className="h-9 w-[260px] border-none bg-muted/60"
-            placeholder="Search contacts, projects, invoices..."
+            placeholder="Search contacts, projects, milestones, invoices..."
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             onFocus={() => {
@@ -341,6 +343,25 @@ export function TopBar({
                           onClick={() => setSearchOpen(false)}
                         >
                           {item.invoiceNo}
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">Milestones</p>
+                  <div className="mt-2 space-y-1">
+                    {results.milestones.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No matches</p>
+                    ) : (
+                      results.milestones.slice(0, 3).map((item) => (
+                        <Link
+                          key={item.id}
+                          href={`/projects/${item.projectId}`}
+                          className="block rounded-md px-2 py-1 text-foreground hover:bg-muted/60"
+                          onClick={() => setSearchOpen(false)}
+                        >
+                          {item.title}
                         </Link>
                       ))
                     )}

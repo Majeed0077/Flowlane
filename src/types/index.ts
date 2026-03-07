@@ -65,6 +65,26 @@ export type Project = {
     type: string;
     size: number;
   }[];
+  logos?: {
+    id?: string;
+    name: string;
+    url: string;
+    type: string;
+    size: number;
+  }[];
+  assigneeIds?: string[];
+  comments?: {
+    id: string;
+    body: string;
+    authorId: string;
+    authorName: string;
+    createdAt: string;
+  }[];
+  checklist?: {
+    id: string;
+    title: string;
+    done: boolean;
+  }[];
   links: string[];
   archived: boolean;
 };
@@ -112,7 +132,7 @@ export type User = {
   name: string;
   email: string;
   passwordHash: string;
-  role: "owner" | "editor";
+  role: "owner" | "admin" | "member" | "guest";
   active: boolean;
   avatarUrl?: string;
 };
@@ -140,7 +160,7 @@ export type ChatMessage = {
   body: string;
   senderId: string;
   senderName: string;
-  senderRole: "owner" | "editor";
+  senderRole: "owner" | "admin" | "member" | "guest";
   createdAt: string;
   pinnedAt?: string;
   readBy?: string[];

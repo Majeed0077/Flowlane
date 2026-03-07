@@ -7,7 +7,7 @@ import type { Role } from "@/lib/rbac";
 export async function AppShell({ children }: { children: React.ReactNode }) {
   const role = await getCurrentRole();
   const initialRole: Role | null =
-    role === "owner" || role === "editor" ? role : null;
+    role === "owner" || role === "admin" || role === "member" || role === "guest" ? role : null;
 
   const [currentUser, initialWorkspaces] = await Promise.all([
     getCurrentUser(),
@@ -15,7 +15,10 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
   ]);
 
   const safeUserRole: Role | null =
-    currentUser?.role === "owner" || currentUser?.role === "editor"
+    currentUser?.role === "owner" ||
+    currentUser?.role === "admin" ||
+    currentUser?.role === "member" ||
+    currentUser?.role === "guest"
       ? currentUser.role
       : null;
 

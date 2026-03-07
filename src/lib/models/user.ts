@@ -4,7 +4,7 @@ const UserSchema = new Schema(
   {
     email: { type: String, required: true, lowercase: true },
     name: { type: String, required: true },
-    role: { type: String, enum: ["Owner", "Editor"], required: true },
+    role: { type: String, enum: ["Owner", "Admin", "Member", "Guest", "Editor"], required: true },
     passwordHash: { type: String, required: true },
     workspaceId: { type: String, required: true, index: true, default: "default" },
     tokenVersion: { type: Number, required: true, default: 0 },

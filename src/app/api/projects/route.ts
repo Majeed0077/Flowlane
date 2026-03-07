@@ -7,7 +7,7 @@ import { assertCanWriteProjectFinanceFields, sanitizeProjectForRole } from "@/li
 
 function serialize(doc: any) {
   const obj = doc.toObject ? doc.toObject() : doc;
-  const { _id, __v, links, attachments, ...rest } = obj;
+  const { _id, __v, links, attachments, logos, comments, checklist, assigneeIds, ...rest } = obj;
   const normalizedLinks = Array.isArray(links)
     ? links
     : links
@@ -24,7 +24,27 @@ function serialize(doc: any) {
         })
         .filter(Boolean)
     : [];
-  return { id: _id, ...rest, links: normalizedLinks, attachments: normalizedAttachments };
+  const normalizedLogos = Array.isArray(logos)
+    ? logos
+        .map((item: any) => {
+          if (typeof item === "string") {
+            const name = item.split("/").filter(Boolean).pop() ?? "Logo";
+            return { id: undefined, name, url: item, type: "", size: 0 };
+          }
+          return item;
+        })
+        .filter(Boolean)
+    : [];
+  return {
+    id: _id,
+    ...rest,
+    links: normalizedLinks,
+    attachments: normalizedAttachments,
+    logos: normalizedLogos,
+    comments: Array.isArray(comments) ? comments : [],
+    checklist: Array.isArray(checklist) ? checklist : [],
+    assigneeIds: Array.isArray(assigneeIds) ? assigneeIds : [],
+  };
 }
 
 export async function GET(req: Request) {

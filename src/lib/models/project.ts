@@ -11,6 +11,26 @@ const AttachmentSchema = new Schema(
   { _id: false },
 );
 
+const ProjectCommentSchema = new Schema(
+  {
+    id: String,
+    body: String,
+    authorId: String,
+    authorName: String,
+    createdAt: String,
+  },
+  { _id: false },
+);
+
+const ProjectChecklistItemSchema = new Schema(
+  {
+    id: String,
+    title: String,
+    done: Boolean,
+  },
+  { _id: false },
+);
+
 const ProjectSchema = new Schema(
   {
     _id: { type: String, required: true },
@@ -24,6 +44,22 @@ const ProjectSchema = new Schema(
     notes: { type: String },
     attachments: {
       type: [AttachmentSchema],
+      default: [],
+    },
+    logos: {
+      type: [AttachmentSchema],
+      default: [],
+    },
+    assigneeIds: {
+      type: [String],
+      default: [],
+    },
+    comments: {
+      type: [ProjectCommentSchema],
+      default: [],
+    },
+    checklist: {
+      type: [ProjectChecklistItemSchema],
       default: [],
     },
     startDate: { type: String },

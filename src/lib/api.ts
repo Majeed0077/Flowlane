@@ -23,7 +23,7 @@ export type AdminUser = {
   id: string;
   name: string;
   email: string;
-  role: "Owner" | "Editor";
+  role: "Owner" | "Admin" | "Member" | "Guest";
   isActive: boolean;
   isDirect?: boolean;
   isSelf?: boolean;
@@ -35,7 +35,7 @@ export type AdminInvite = {
   id: string;
   email: string;
   name?: string;
-  role: "Owner" | "Editor";
+  role: "Owner" | "Admin" | "Member" | "Guest";
   status: "pending" | "accepted" | "revoked" | "expired";
   invitedByEmail: string;
   createdAt: string;
@@ -49,7 +49,7 @@ export type WorkspaceInfo = {
   id: string;
   name: string;
   logoUrl?: string;
-  role: "owner" | "editor";
+  role: "owner" | "admin" | "member" | "guest";
   isPersonal: boolean;
   isActive: boolean;
 };
@@ -108,7 +108,7 @@ export const api = {
     request<AuditEvent>("/api/audit", { method: "POST", body: JSON.stringify(payload) }),
 
   getUsers: () => request<AdminUser[]>("/api/admin/users"),
-  createUser: (payload: { name: string; email: string; role: "Owner" | "Editor"; password: string }) =>
+  createUser: (payload: { name: string; email: string; role: "Owner" | "Admin" | "Member" | "Guest"; password: string }) =>
     request<AdminUser>("/api/admin/users", { method: "POST", body: JSON.stringify(payload) }),
   updateUser: (id: string, payload: Partial<AdminUser> & { password?: string }) =>
     request<AdminUser>(`/api/admin/users/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
@@ -116,7 +116,7 @@ export const api = {
     request<{ id: string }>(`/api/admin/users/${id}`, { method: "DELETE" }),
 
   getInvites: () => request<AdminInvite[]>("/api/admin/invites"),
-  createInvite: (payload: { name?: string; email: string; role: "Owner" | "Editor" }) =>
+  createInvite: (payload: { name?: string; email: string; role: "Owner" | "Admin" | "Member" | "Guest" }) =>
     request<AdminInvite>("/api/admin/invites", { method: "POST", body: JSON.stringify(payload) }),
   revokeInvite: (id: string) =>
     request<{ id: string; status: string }>(`/api/admin/invites/${id}`, {

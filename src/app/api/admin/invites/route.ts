@@ -9,6 +9,7 @@ import { requireSession } from "@/lib/auth";
 import { teamInviteCreateSchema } from "@/lib/validation";
 import { getClientIp, rateLimit } from "@/lib/rateLimit";
 import { sendInviteEmail } from "@/lib/email";
+import { normalizeRole, toDisplayRole } from "@/lib/rbac";
 
 function resolveAppBaseUrl(req: Request) {
   const forwardedHost = req.headers.get("x-forwarded-host");
@@ -26,7 +27,7 @@ function serializeInvite(invite: any, baseUrl: string) {
     id: String(invite._id),
     email: invite.email,
     name: invite.name ?? "",
-    role: invite.role,
+    role: toDisplayRole(normalizeRole(invite.role)),
     status,
     invitedByEmail: invite.invitedByEmail,
     createdAt: invite.createdAt,

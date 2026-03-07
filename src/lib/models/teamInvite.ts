@@ -4,7 +4,7 @@ const TeamInviteSchema = new Schema(
   {
     email: { type: String, required: true, lowercase: true, index: true },
     name: { type: String, default: "" },
-    role: { type: String, enum: ["Owner", "Editor"], required: true },
+    role: { type: String, enum: ["Owner", "Admin", "Member", "Guest", "Editor"], required: true },
     token: { type: String, required: true, unique: true, index: true },
     status: {
       type: String,

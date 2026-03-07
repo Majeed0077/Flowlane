@@ -4,7 +4,7 @@ const WorkspaceMembershipSchema = new Schema(
   {
     userId: { type: String, required: true, index: true },
     workspaceId: { type: String, required: true, index: true },
-    role: { type: String, enum: ["owner", "editor"], required: true },
+    role: { type: String, enum: ["owner", "admin", "member", "guest", "editor"], required: true },
     isActive: { type: Boolean, default: true },
     invitedById: { type: String, default: "" },
   },

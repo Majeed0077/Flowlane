@@ -131,6 +131,20 @@ export default function DashboardPage() {
     [milestones],
   );
 
+  const assignedProjects = useMemo(
+    () => projects.filter((project) => (project.assigneeIds ?? []).length > 0).length,
+    [projects],
+  );
+
+  const openChecklistItems = useMemo(
+    () =>
+      projects.reduce(
+        (count, project) => count + (project.checklist ?? []).filter((item) => !item.done).length,
+        0,
+      ),
+    [projects],
+  );
+
   const projectCounts = useMemo(() => {
     const active = projects.filter((project) => project.status === "active").length;
     const planning = projects.filter((project) => project.status === "planning").length;
@@ -180,8 +194,8 @@ export default function DashboardPage() {
               href="/projects"
             />
             <StatCard
-              title="Waiting on Client"
-              value={waitingOnClient}
+              title="Assigned Projects"
+              value={assignedProjects}
               href="/projects"
             />
           </>
@@ -236,6 +250,26 @@ export default function DashboardPage() {
           <div>
             <p className="text-xs text-muted-foreground">Completed</p>
             <p className="text-lg font-semibold">{projectCounts.completed}</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Execution Health</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-3">
+          <div>
+            <p className="text-xs text-muted-foreground">Waiting on Client</p>
+            <p className="text-lg font-semibold">{waitingOnClient}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Open Checklist Items</p>
+            <p className="text-lg font-semibold">{openChecklistItems}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Projects with Assignees</p>
+            <p className="text-lg font-semibold">{assignedProjects}</p>
           </div>
         </CardContent>
       </Card>

@@ -6,6 +6,7 @@ import { AuditModel } from "@/lib/models/audit";
 import { requireSession } from "@/lib/auth";
 import { adminUserCreateSchema } from "@/lib/validation";
 import { hashPassword } from "@/lib/password";
+import { normalizeRole, toDisplayRole } from "@/lib/rbac";
 
 export async function GET(req: Request) {
   let session;
@@ -50,12 +51,8 @@ export async function GET(req: Request) {
         name: user.name,
         email: user.email,
         role: isDirect
-          ? user.role === "owner"
-            ? "Owner"
-            : "Editor"
-          : membership?.role === "owner"
-            ? "Owner"
-            : "Editor",
+          ? toDisplayRole(normalizeRole(String(user.role)))
+          : toDisplayRole(normalizeRole(String(membership?.role ?? "member"))),
         isActive: isDirect ? Boolean(user.isActive) : Boolean(membership?.isActive && user.isActive),
         isDirect,
         isSelf: String(user._id) === session.userId,
@@ -105,7 +102,7 @@ export async function POST(req: Request) {
       { userId: String(existing._id), workspaceId: session.workspaceId },
       {
         $set: {
-          role: parsed.data.role === "Owner" ? "owner" : "editor",
+          role: normalizeRole(parsed.data.role),
           isActive: true,
           invitedById: session.userId,
         },
@@ -146,7 +143,7 @@ export async function POST(req: Request) {
   const created = await UserModel.create({
     email,
     name: parsed.data.name,
-    role: parsed.data.role,
+    role: toDisplayRole(normalizeRole(parsed.data.role)),
     workspaceId: session.workspaceId,
     passwordHash,
     isActive: true,
@@ -171,7 +168,7 @@ export async function POST(req: Request) {
       id: String(created._id),
       name: created.name,
       email: created.email,
-      role: created.role,
+    role: toDisplayRole(normalizeRole(created.role)),
       isActive: created.isActive,
       isDirect: true,
       isSelf: String(created._id) === session.userId,

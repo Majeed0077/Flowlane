@@ -14,6 +14,7 @@ import {
 } from "@/lib/auth";
 import { AuditModel } from "@/lib/models/audit";
 import { getClientIp, rateLimit } from "@/lib/rateLimit";
+import { normalizeRole } from "@/lib/rbac";
 
 const schema = z.object({
   name: z.string().min(1),
@@ -80,7 +81,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const targetRole = invite.role === "Owner" ? "owner" : "editor";
+    const targetRole = normalizeRole(invite.role);
     await WorkspaceMembershipModel.updateOne(
       { userId: String(existing._id), workspaceId: invite.workspaceId },
       {
@@ -104,7 +105,7 @@ export async function POST(request: Request) {
     const sessionToken = await createSessionToken({
       userId: String(existing._id),
       workspaceId: String(existing.workspaceId),
-      role: existing.role.toLowerCase() === "owner" ? "owner" : "editor",
+      role: normalizeRole(existing.role),
       email: existing.email,
       name: existing.name,
       tokenVersion: typeof existing.tokenVersion === "number" ? existing.tokenVersion : 0,
@@ -117,7 +118,7 @@ export async function POST(request: Request) {
         id: String(existing._id),
         name: existing.name,
         email: existing.email,
-        role: existing.role.toLowerCase() === "owner" ? "owner" : "editor",
+        role: normalizeRole(existing.role),
         defaultLandingPage,
       },
     });
@@ -160,7 +161,7 @@ export async function POST(request: Request) {
   });
 
   if (invite) {
-    const targetRole = invite.role === "Owner" ? "owner" : "editor";
+    const targetRole = normalizeRole(invite.role);
     await WorkspaceMembershipModel.updateOne(
       { userId: String(created._id), workspaceId: invite.workspaceId },
       {

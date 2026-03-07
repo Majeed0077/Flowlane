@@ -8,6 +8,7 @@ import { hashPassword, verifyPassword } from "@/lib/password";
 import { createSessionToken, getActiveWorkspaceCookieName, getSessionCookieName } from "@/lib/auth";
 import { logAuditEvent } from "@/lib/audit";
 import { getClientIp, rateLimit } from "@/lib/rateLimit";
+import { normalizeRole } from "@/lib/rbac";
 
 export async function POST(request: Request) {
   const body = await request.json();
@@ -80,7 +81,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "Invite has expired." }, { status: 400 });
     }
 
-    const targetRole = invite.role === "Owner" ? "owner" : "editor";
+    const targetRole = normalizeRole(invite.role);
     await WorkspaceMembershipModel.updateOne(
       { userId: String(user._id), workspaceId: invite.workspaceId },
       {
@@ -102,7 +103,7 @@ export async function POST(request: Request) {
     activeWorkspaceId = String(invite.workspaceId);
   }
 
-  const normalizedRole = user.role.toLowerCase() === "owner" ? "owner" : "editor";
+  const normalizedRole = normalizeRole(user.role);
   const defaultLandingPage = user.defaultLandingPage === "dashboard" ? "dashboard" : "today";
 
   const sessionToken = await createSessionToken({

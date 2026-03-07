@@ -50,7 +50,7 @@ export function AdminUsers({
   const [loading, setLoading] = useState(false);
   const [inviteName, setInviteName] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<"Owner" | "Editor">("Editor");
+  const [inviteRole, setInviteRole] = useState<"Owner" | "Admin" | "Member" | "Guest">("Member");
   const [workspaceName, setWorkspaceName] = useState(initialWorkspaceName);
   const [workspaceLogo, setWorkspaceLogo] = useState(initialWorkspaceLogo ?? "");
   const router = useRouter();
@@ -206,7 +206,7 @@ export function AdminUsers({
       setInvites((prev) => [created, ...prev]);
       setInviteName("");
       setInviteEmail("");
-      setInviteRole("Editor");
+      setInviteRole("Member");
       toast.success("Invite created and stored.");
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Unable to create invite.";
@@ -385,13 +385,15 @@ export function AdminUsers({
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
             />
-            <Select value={inviteRole} onValueChange={(value) => setInviteRole(value as "Owner" | "Editor")}>
+            <Select value={inviteRole} onValueChange={(value) => setInviteRole(value as "Owner" | "Admin" | "Member" | "Guest")}>
               <SelectTrigger>
                 <SelectValue placeholder="Role" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Owner">Owner</SelectItem>
-                <SelectItem value="Editor">Editor</SelectItem>
+                <SelectItem value="Admin">Admin</SelectItem>
+                <SelectItem value="Member">Member</SelectItem>
+                <SelectItem value="Guest">Guest</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -520,14 +522,16 @@ export function AdminUsers({
                     {canManage ? (
                       <Select
                         value={user.role}
-                        onValueChange={(value) => updateUser(user.id, { role: value as "Owner" | "Editor" })}
+                        onValueChange={(value) => updateUser(user.id, { role: value as "Owner" | "Admin" | "Member" | "Guest" })}
                       >
                         <SelectTrigger className="w-[140px]">
                           <SelectValue placeholder="Role" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Owner">Owner</SelectItem>
-                          <SelectItem value="Editor">Editor</SelectItem>
+                          <SelectItem value="Admin">Admin</SelectItem>
+                          <SelectItem value="Member">Member</SelectItem>
+                          <SelectItem value="Guest">Guest</SelectItem>
                         </SelectContent>
                       </Select>
                     ) : (

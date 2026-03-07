@@ -1,7 +1,7 @@
 export type InviteEmailInput = {
   to: string;
   inviteUrl: string;
-  role: "Owner" | "Editor";
+  role: "Owner" | "Admin" | "Member" | "Guest";
   invitedByEmail: string;
   name?: string;
   workspaceName?: string;
